@@ -14,8 +14,7 @@ sync = (src, dst, opt = {}) ->
         .flags flags
         .source "#{src}/"
         .destination(dst)
-        .output (data) -> console.log data.toString 'utf8'
-            , (err)-> console.log err.toString 'utf8'
+        .output (data) -> console.log data.toString('utf-8').trim()
 
     rsync.delete() if not opt.sync_skip_deletes
     rsync.exclude opt.exclude if opt.exclude?
@@ -23,11 +22,9 @@ sync = (src, dst, opt = {}) ->
         console.log err if err?
 
 upload = ->
-    console.log 'Syncing from local to remote ...'
+    console.log "Syncing from #{local} to #{config.remote.host} ..."
     sync(local, remote, config.option)
 
 download = ->
-    console.log 'Syncing from remote to local ...'
+    console.log "Syncing from #{config.remote.host} to #{local} ..."
     sync(remote, local, config.option)
-
-download()
