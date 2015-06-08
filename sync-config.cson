@@ -1,0 +1,19 @@
+remote:
+    host: "anna"
+    user: "dingjie"
+    path: "/home/dingjie/www/farm.djc.orantrip.com"
+
+behaviour:
+    upload_on_save:     true
+    sync_down_on_open:  true
+
+option:
+    sync_skip_deletes:  false,
+    exclude: [
+        'sync-config.cson'
+        '.git'
+        'node_modules'
+        'tmp'
+        'vendor'
+        'Vendor'
+    ]
