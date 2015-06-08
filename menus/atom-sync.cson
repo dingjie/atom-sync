@@ -1,22 +1,19 @@
 # See https://atom.io/docs/latest/hacking-atom-package-word-count#menus for more details
 'context-menu':
-  'atom-text-editor': [
-    {
-      'label': 'Toggle atom-sync'
-      'command': 'atom-sync:toggle'
-    }
-  ]
-'menu': [
-  {
-    'label': 'Packages'
-    'submenu': [
-      'label': 'atom-sync'
-      'submenu': [
-        {
-          'label': 'Toggle'
-          'command': 'atom-sync:toggle'
-        }
-      ]
+    '.tree-view.full-menu .header.list-item': [
+        'label': 'Sync'
+        'submenu': [
+            {
+                'label': 'Edit Remote Config'
+                'command': 'atom-sync:configure'
+            }
+            {
+                'label': 'Sync Remote -> Local'
+                'command': 'atom-sync:download'
+            }
+            {
+                'label': 'Sync Local -> Remote'
+                'command': 'atom-sync:upload'
+            }
+        ]
     ]
-  }
-]

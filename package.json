@@ -1,18 +1,18 @@
 {
-    "name": "atom-sync",
-    "main": "./lib/atom-sync",
-    "version": "0.0.0",
-    "description": "A short description of your package",
-    "keywords": [
-    ],
-    "activationCommands": {
-        "atom-workspace": "atom-sync:toggle"
-    },
-    "repository": "https://github.com/atom/atom-sync",
-    "license": "MIT",
-    "engines": {
-        "atom": ">=0.174.0 <2.0.0"
-    },
-    "dependencies": {
-    }
+  "name": "atom-sync",
+  "main": "./lib/atom-sync",
+  "version": "0.1.0",
+  "description": "Sync whole project via ssh+rsync",
+  "keywords": [],
+  "repository": "https://github.com/atom/atom-sync",
+  "license": "MIT",
+  "engines": {
+    "atom": ">=0.174.0 <2.0.0"
+  },
+  "dependencies": {
+    "cson": "^3.0.1",
+    "fs-plus": "^2.8.1",
+    "rsync": "^0.4.0",
+    "underscore": "^1.8.3"
+  }
 }

@@ -8,7 +8,7 @@ behaviour:
     sync_down_on_open:  true
 
 option:
-    sync_skip_deletes:  false,
+    delete_files:       true
     exclude: [
         'sync-config.cson'
         '.git'

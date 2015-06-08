@@ -16,10 +16,11 @@ sync = (src, dst, opt = {}) ->
         .destination(dst)
         .output (data) -> console.log data.toString('utf-8').trim()
 
-    rsync.delete() if not opt.sync_skip_deletes
+    rsync.delete() if opt.delete_files?
     rsync.exclude opt.exclude if opt.exclude?
     rsync.execute (err, code, cmd) ->
         console.log err if err?
+        console.log cmd
 
 upload = ->
     console.log "Syncing from #{local} to #{config.remote.host} ..."

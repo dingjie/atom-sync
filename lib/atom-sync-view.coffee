@@ -7,7 +7,7 @@ class AtomSyncView
 
     # Create message element
     message = document.createElement('div')
-    message.textContent = "The AtomSync package is Alive! It's ALIVE!"
+    message.textContent = "Hello World #{__dirname}"
     message.classList.add('message')
     @element.appendChild(message)
 
