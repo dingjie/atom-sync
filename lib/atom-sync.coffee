@@ -4,6 +4,7 @@ path = require 'path'
 cson = require 'CSON'
 fs = require 'fs-plus'
 Rsync = require 'rsync'
+_ = require 'underscore'
 
 module.exports = AtomSync =
     atomSyncView: null
@@ -37,11 +38,13 @@ module.exports = AtomSync =
         if @config.behaviour.uploadOnSave is true
             @subscriptions.add atom.workspace.observeTextEditors (editor) =>
                 onDidSave = editor.onDidSave (e) =>
-                    @upload()
+                    if not @isExclude e.path.replace(@root, '')
+                        @upload()
         if @config.behaviour.syncDownOnOpen is true
             @subscriptions.add atom.workspace.onDidOpen (e) =>
-                @download()
-                atom.workspace.reopenItem()
+                if not @isExclude e.uri.replace(@root, '')
+                    @download()
+                    atom.workspace.reopenItem()
 
     deactivate: ->
         @modalPanel.destroy()
@@ -63,14 +66,16 @@ module.exports = AtomSync =
 
     download: ->
         if not @loadConfig()
-            throw new Error "Create config file first"
+            atom.notifications.addError "You must create remote config first"
+            return
 
         remote = "#{@config.remote.user}@#{@config.remote.host}:#{@config.remote.path}"
         @sync(remote, @root, @config.option)
 
     upload: ->
         if not @loadConfig()
-            throw new Error "Create config file first"
+            atom.notifications.addError "You must create remote config first"
+            return
 
         remote = "#{@config.remote.user}@#{@config.remote.host}:#{@config.remote.path}"
         @sync(@root, remote, @config.option)
@@ -88,12 +93,18 @@ module.exports = AtomSync =
         rsync.delete() if opt.deleteFiles?
         rsync.exclude opt.exclude if opt.exclude?
         rsync.execute (err, code, cmd) ->
-            console.log err if err?
+            atom.notifications.addError "#{err.message}, please review your config file." if err
 
     loadConfig: ->
         if fs.isFileSync @configFile
             @config = cson.load @configFile
             return true
+        return false
+
+    isExclude: (str) ->
+        for pattern in _.union @config.option.exclude, [@configFileName]
+            if (str.indexOf pattern) isnt -1
+                return true
         return false
 
     sampleConfig:
