@@ -6,6 +6,8 @@ fs = require 'fs-plus'
 Rsync = require 'rsync'
 _ = require 'underscore'
 
+# @TODO refactor and foolproof
+
 module.exports = AtomSync =
     atomSyncView: null
     modalPanel: null
@@ -35,16 +37,19 @@ module.exports = AtomSync =
         @subscriptions.add atom.commands.add 'atom-workspace', 'atom-sync:download': (e) => @download(e)
         @subscriptions.add atom.commands.add 'atom-workspace', 'atom-sync:upload': (e) => @upload(e)
 
-        if @config.behaviour.uploadOnSave is true
-            @subscriptions.add atom.workspace.observeTextEditors (editor) =>
-                onDidSave = editor.onDidSave (e) =>
-                    if not @isExclude e.path.replace(@root, '')
-                        @upload()
-        if @config.behaviour.syncDownOnOpen is true
-            @subscriptions.add atom.workspace.onDidOpen (e) =>
-                if not @isExclude e.uri.replace(@root, '')
-                    @download()
-                    atom.workspace.reopenItem()
+        if @config isnt null
+            if @config.behaviour.uploadOnSave is true
+                @subscriptions.add atom.workspace.observeTextEditors (editor) =>
+                    onDidSave = editor.onDidSave (e) =>
+                        if not @isExclude e.path.replace(@root, '')
+                            @upload()
+                            # @TODO upload single file
+            if @config.behaviour.syncDownOnOpen is true
+                @subscriptions.add atom.workspace.onDidOpen (e) =>
+                    if not @isExclude e.uri.replace(@root, '')
+                        @download()
+                        atom.workspace.reopenItem()
+                        # @TODO download single file
 
     deactivate: ->
         @modalPanel.destroy()
@@ -64,6 +69,7 @@ module.exports = AtomSync =
         #     @modalPanel.show()
         #     setTimeout (=> @modalPanel.hide()), 1000
 
+    # @TODO rename to downloadAll
     download: ->
         if not @loadConfig()
             atom.notifications.addError "You must create remote config first"
@@ -72,6 +78,7 @@ module.exports = AtomSync =
         remote = "#{@config.remote.user}@#{@config.remote.host}:#{@config.remote.path}"
         @sync(remote, @root, @config.option)
 
+    # @TODO rename to uploadAll
     upload: ->
         if not @loadConfig()
             atom.notifications.addError "You must create remote config first"
@@ -79,6 +86,10 @@ module.exports = AtomSync =
 
         remote = "#{@config.remote.user}@#{@config.remote.host}:#{@config.remote.path}"
         @sync(@root, remote, @config.option)
+
+    # @TODO download specific file
+    # @TODO upload specific file
+    # @TODO confirm dialogue
 
     sync: (src, dst, opt = {}) ->
         console.log "Syncing from #{src} to #{dst}..."
