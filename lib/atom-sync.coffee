@@ -21,8 +21,7 @@ module.exports = AtomSync =
         @root = atom.project.rootDirectories[0].path
         @configFile = path.join @root, @configFileName
 
-        if fs.isFileSync @configFile
-            @config = cson.load @configFile
+        @loadConfig()
 
         @atomSyncView = new AtomSyncView(state.atomSyncViewState)
         @modalPanel = atom.workspace.addModalPanel(item: @atomSyncView.getElement(), visible: false)
@@ -34,6 +33,15 @@ module.exports = AtomSync =
         @subscriptions.add atom.commands.add '.tree-view.full-menu .header.list-item', 'atom-sync:configure': (e) => @configure(e)
         @subscriptions.add atom.commands.add 'atom-workspace', 'atom-sync:download': (e) => @download(e)
         @subscriptions.add atom.commands.add 'atom-workspace', 'atom-sync:upload': (e) => @upload(e)
+
+        if @config.behaviour.uploadOnSave is true
+            @subscriptions.add atom.workspace.observeTextEditors (editor) =>
+                onDidSave = editor.onDidSave (e) =>
+                    @upload()
+        if @config.behaviour.syncDownOnOpen is true
+            @subscriptions.add atom.workspace.onDidOpen (e) =>
+                @download()
+                atom.workspace.reopenItem()
 
     deactivate: ->
         @modalPanel.destroy()
@@ -54,22 +62,21 @@ module.exports = AtomSync =
         #     setTimeout (=> @modalPanel.hide()), 1000
 
     download: ->
-        if not @loadConfig
+        if not @loadConfig()
             throw new Error "Create config file first"
 
         remote = "#{@config.remote.user}@#{@config.remote.host}:#{@config.remote.path}"
-        console.log "Syncing from #{@config.remote.host} to #{@root}..."
         @sync(remote, @root, @config.option)
 
     upload: ->
-        if not @loadConfig
+        if not @loadConfig()
             throw new Error "Create config file first"
 
         remote = "#{@config.remote.user}@#{@config.remote.host}:#{@config.remote.path}"
-        console.log "Syncing from #{@root} to #{@config.remote.host}..."
         @sync(@root, remote, @config.option)
 
     sync: (src, dst, opt = {}) ->
+        console.log "Syncing from #{src} to #{dst}..."
         flags = opt.flags ? 'avzp'
         rsync = new Rsync()
             .shell 'ssh'
@@ -86,7 +93,7 @@ module.exports = AtomSync =
     loadConfig: ->
         if fs.isFileSync @configFile
             @config = cson.load @configFile
-            retun true
+            return true
         return false
 
     sampleConfig:
