@@ -4,9 +4,9 @@ atom-sync is an Atom package to sync files bidirectionally between remote host a
 
 [![experimental](http://badges.github.io/stability-badges/dist/experimental.svg)](http://github.com/badges/stability-badges)[![Build Status](https://travis-ci.org/dingjie/atom-sync.svg?branch=master)](https://travis-ci.org/dingjie/atom-sync)
 
-The package is currently in early development and has only been tested on my Mac.
+The package is currently in early development and has only been tested on my Mac. Please try it out and provide feedback. 
 
-*USE IT AT YOUR OWN RISK.*
+Please ensure you have `ssh` and `rsync` installed.
 
 ![atom-sync](https://cloud.githubusercontent.com/assets/586262/8066587/feedcc68-0f1a-11e5-973e-e6b3668586fb.gif)
 
