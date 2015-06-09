@@ -16,5 +16,11 @@
     "mixto": "^1.0.0",
     "property-accessors": "^1.1.3",
     "rsync": "^0.4.0"
-  }
+  },
+  "keywords": [
+    "sync",
+    "ssh",
+    "rsync",
+    "remote"
+  ]
 }
