@@ -1,3 +1,3 @@
 # atom-sync package
 
-In early development
+In early development and has only been tested in Mac
