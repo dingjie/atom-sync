@@ -9,11 +9,11 @@
             }
             {
                 'label': 'Sync Remote -> Local'
-                'command': 'atom-sync:download'
+                'command': 'atom-sync:download-directory'
             }
             {
                 'label': 'Sync Local -> Remote'
-                'command': 'atom-sync:upload'
+                'command': 'atom-sync:upload-directory'
             }
         ]
     ]

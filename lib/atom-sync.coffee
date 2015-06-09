@@ -33,22 +33,26 @@ module.exports = AtomSync =
         @subscriptions.add atom.commands.add '.tree-view.full-menu .header.list-item', 'atom-sync:configure': (e) =>
             @configure()
 
-        @subscriptions.add atom.commands.add 'atom-workspace', 'atom-sync:download': (e) =>
+        @subscriptions.add atom.commands.add 'atom-workspace', 'atom-sync:download-directory': (e) =>
             @downloadDirectory atom.workspace.getLeftPanels()[0].getItem().selectedPaths()[0]
 
-        @subscriptions.add atom.commands.add 'atom-workspace', 'atom-sync:upload': (e) =>
+        @subscriptions.add atom.commands.add 'atom-workspace', 'atom-sync:upload-directory': (e) =>
             @uploadDirectory atom.workspace.getLeftPanels()[0].getItem().selectedPaths()[0]
 
-        @subscriptions.add atom.commands.add 'atom-workspace', 'atom-sync:show-panel': (e) =>
+        @subscriptions.add atom.commands.add 'atom-workspace', 'atom-sync:toggle-log-panel': (e) =>
+            if @bottomPanel.isVisible() then @bottomPanel.hide() else @bottomPanel.show()
+
+        @subscriptions.add atom.commands.add 'atom-workspace', 'atom-sync:show-log-panel': (e) =>
             @bottomPanel.show()
 
-        @subscriptions.add atom.commands.add 'atom-workspace', 'atom-sync:close-panel': (e) =>
+        @subscriptions.add atom.commands.add 'atom-workspace', 'atom-sync:close-log-panel': (e) =>
             @bottomPanel.hide()
 
         if @config isnt null
             if @config.behaviour.uploadOnSave is true
                 @subscriptions.add atom.workspace.observeTextEditors (editor) =>
-                    onDidSave = editor.onDidSave (e) => @uploadFile e.path
+                    editor.onDidSave (e) =>
+                        @uploadFile e.path
 
             if @config.behaviour.syncDownOnOpen is true
                 @subscriptions.add atom.workspace.onDidOpen (e) =>
@@ -90,6 +94,7 @@ module.exports = AtomSync =
         return false
 
     downloadFile: (f) ->
+        return if not fs.isFileSync f
         return if not @assertConfig()
         relativePath = @getRelativePath @root, f
         return if @isExcluded relativePath
@@ -99,6 +104,7 @@ module.exports = AtomSync =
         @sync src, dst, @config.option
 
     uploadFile: (f) ->
+        return if not fs.isFileSync f
         return if not @assertConfig()
         relativePath = @getRelativePath @root, f
         return if @isExcluded relativePath
@@ -108,6 +114,7 @@ module.exports = AtomSync =
         @sync src, dst, @config.option
 
     downloadDirectory: (d) ->
+        return if not fs.isDirectorySync d
         return if not @assertConfig()
         relativePath = @getRelativePath @root, d
         return if @isExcluded relativePath
@@ -117,6 +124,7 @@ module.exports = AtomSync =
         @sync src, dst, @config.option
 
     uploadDirectory: (d) ->
+        return if not fs.isDirectorySync d
         return if not @assertConfig()
         relativePath = @getRelativePath @root, d
         return if @isExcluded relativePath

@@ -11,4 +11,4 @@
 #   'ctrl-alt-o': 'atom-sync:toggle'
 
 'atom-workspace':
-    'ctrl-cmd-l': 'atom-sync:toggle-panel'
+    'ctrl-alt-l': 'atom-sync:toggle-log-panel'
