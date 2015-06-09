@@ -1,6 +1,6 @@
 # atom-sync package
 
-atom-sync is an Atom package to sync files between remote host and local over ssh+rsync.
+atom-sync is an Atom package to sync files bidirectionally between remote host and local over ssh+rsync.
 
 [![experimental](http://badges.github.io/stability-badges/dist/experimental.svg)](http://github.com/badges/stability-badges)[![Build Status](https://travis-ci.org/dingjie/atom-sync.svg?branch=master)](https://travis-ci.org/dingjie/atom-sync)
 
@@ -44,7 +44,7 @@ option:
 ```
 
 ### Notice ###
-* Password based login is not supported, you have to assign your key file and better host name in .ssh/config in advanced. Try [Simplify Your Life With an SSH Config File](http://nerderati.com/2011/03/17/simplify-your-life-with-an-ssh-config-file/).
+* Password based login is not supported, you have to assign your key file and better host name in .ssh/config in advanced. Try to [Simplify Your Life With an SSH Config File](http://nerderati.com/2011/03/17/simplify-your-life-with-an-ssh-config-file/).
 
 ### Known Problems ###
 * You have to `Sync Local -> Remote` manually after renaming and deleteing files.
@@ -53,5 +53,4 @@ option:
 * Listen to events
   * Create folders
   * Rename files/folders
-
 * SSH parameters in config file e.g. public key assignment, port et al.
