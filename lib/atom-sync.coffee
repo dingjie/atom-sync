@@ -4,7 +4,6 @@ path = require 'path'
 cson = require 'CSON'
 fs = require 'fs-plus'
 Rsync = require 'rsync'
-_ = require 'underscore'
 
 # @TODO refactor and foolproof
 
@@ -27,6 +26,8 @@ module.exports = AtomSync =
 
         @consoleView = new ConsoleView(state.consoleViewState)
         @bottomPanel = atom.workspace.addBottomPanel(item: @consoleView.element, visible: false)
+        @consoleView.close =>
+            @bottomPanel.hide()
 
         @subscriptions = new CompositeDisposable
         @subscriptions.add atom.commands.add '.tree-view.full-menu .header.list-item', 'atom-sync:configure': (e) =>
@@ -79,7 +80,8 @@ module.exports = AtomSync =
             return
 
     isExcluded: (str) ->
-        return true if (str.indexOf pattern) isnt -1 for pattern in _.union @config.option.exclude
+        for pattern in @config.option.exclude
+            return true if (str.indexOf pattern) isnt -1
         return false
 
     downloadFile: (f) ->
@@ -112,9 +114,9 @@ module.exports = AtomSync =
 
     # @TODO confirm dialogue
 
-    sync: (src, dst, opt = {}) ->
+    sync: (src, dst, opt = {}, cb = null) ->
         @bottomPanel.show() if not @config.behaviour.forgetConsole
-        @consoleView.log "\n\nSyncing from #{src} to #{dst}..."
+        @consoleView.log "<span class='info'>Syncing from #{src} to #{dst}</span> ..."
         rsync = new Rsync()
             .shell 'ssh'
             .flags 'avzpu'
@@ -127,13 +129,11 @@ module.exports = AtomSync =
         rsync.execute (err, code, cmd) =>
             if err
                 atom.notifications.addError "#{err.message}, please review your config file." if err
-                console.log cmd
+                console.error cmd
             else
-                @consoleView.log "\n\nSync completed without error.\n"
-                # if not @config.behaviour.forgetConsole
-                    # setTimeout =>
-                    #     @bottomPanel.hide()
-                    # , 3000
+                @consoleView.log "<span class='success'>Sync completed without error.</spane>\n"
+                if not @config.behaviour.autoHideConsole
+                    setTimeout (=> @bottomPanel.hide()), 3000
 
 
     sampleConfig:
@@ -145,6 +145,7 @@ module.exports = AtomSync =
             uploadOnSave: true
             syncDownOnOpen: true
             forgetConsole: false
+            autoHideConsole: true
         option:
             deleteFiles: true
             exclude: [

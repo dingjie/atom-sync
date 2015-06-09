@@ -11,6 +11,17 @@
         border-top: 0;
         border-color: @panel-heading-border-color;
         padding: 10px;
+
+        .btn_close {
+            float: right;
+            padding: 5px 8px;
+            margin-top: -6px;
+            cursor: pointer;
+
+            &:hover {
+                color: @text-color-highlight;
+            }
+        }
     }
     .console {
         height: 200px;
@@ -24,5 +35,21 @@
         font-size: 11px;
         font-family: "Monaco";
         line-height: 1.2;
+
+        .info {
+            color: @text-color-info;
+        }
+
+        .success {
+            color: @text-color-success;
+        }
+
+        .error {
+            color: @text-color-error;
+        }
+
+        .warning {
+            color: @text-color-warning;
+        }
     }
 }
