@@ -2,6 +2,8 @@
 
 atom-sync is an Atom package to sync files between remote host and local over ssh+rsync.
 
+[![experimental](http://badges.github.io/stability-badges/dist/experimental.svg)](http://github.com/badges/stability-badges)[![Build Status](https://travis-ci.org/dingjie/atom-sync.svg?branch=master)](https://travis-ci.org/dingjie/atom-sync)
+
 The package is currently in early development and has only been tested on my Mac.
 
 *USE IT AT YOUR OWN RISK.*

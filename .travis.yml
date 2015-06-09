@@ -5,9 +5,6 @@ notifications:
     on_success: never
     on_failure: change
 
-before_script:
-- npm install
-
 script: 'curl -s https://raw.githubusercontent.com/atom/ci/master/build-package.sh | sh'
 
 git:
