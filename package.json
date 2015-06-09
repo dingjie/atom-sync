@@ -2,9 +2,9 @@
   "name": "atom-sync",
   "main": "./lib/atom-sync",
   "version": "0.1.0",
-  "description": "Sync whole project via ssh+rsync",
+  "description": "Sync files bidirectionally between remote host and local over ssh+rsync",
   "keywords": [],
-  "repository": "https://github.com/atom/atom-sync",
+  "repository": "https://github.com/dingjie/atom-sync",
   "license": "MIT",
   "engines": {
     "atom": ">=0.174.0 <2.0.0"
