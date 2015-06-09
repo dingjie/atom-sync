@@ -132,8 +132,8 @@ module.exports = AtomSync =
                 console.error cmd
             else
                 @consoleView.log "<span class='success'>Sync completed without error.</spane>\n"
-                if not @config.behaviour.autoHideConsole
-                    setTimeout (=> @bottomPanel.hide()), 3000
+                if @config.behaviour.autoHideConsole
+                    setTimeout (=> @bottomPanel.hide()), 1500
 
 
     sampleConfig:
