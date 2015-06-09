@@ -1,4 +1,4 @@
-AtomSyncView = require './atom-sync-view'
+ConsoleView = require './console-view'
 {CompositeDisposable} = require 'atom'
 path = require 'path'
 cson = require 'CSON'
@@ -9,10 +9,9 @@ _ = require 'underscore'
 # @TODO refactor and foolproof
 
 module.exports = AtomSync =
-    atomSyncView: null
-    modalPanel: null
+    consoleView: null
+    bottomPanel: null
     subscriptions: null
-    configFileName: 'sync-config.cson'
     configFile: null
     config: null
     root: null
@@ -22,89 +21,51 @@ module.exports = AtomSync =
             return
 
         @root = atom.project.rootDirectories[0].path
-        @configFile = path.join @root, @configFileName
+        @configFile = path.join @root, 'sync-config.cson'
 
         @loadConfig()
 
-        @atomSyncView = new AtomSyncView(state.atomSyncViewState)
-        @modalPanel = atom.workspace.addModalPanel(item: @atomSyncView.getElement(), visible: false)
+        @consoleView = new ConsoleView(state.consoleViewState)
+        @bottomPanel = atom.workspace.addBottomPanel(item: @consoleView.element, visible: false)
 
-        # Events subscribed to in atom's system can be easily cleaned up with a CompositeDisposable
         @subscriptions = new CompositeDisposable
-
-        # Register command that toggles this view
-        @subscriptions.add atom.commands.add '.tree-view.full-menu .header.list-item', 'atom-sync:configure': (e) => @configure(e)
-        @subscriptions.add atom.commands.add 'atom-workspace', 'atom-sync:download': (e) => @download(e)
-        @subscriptions.add atom.commands.add 'atom-workspace', 'atom-sync:upload': (e) => @upload(e)
+        @subscriptions.add atom.commands.add '.tree-view.full-menu .header.list-item', 'atom-sync:configure': (e) =>
+            @configure()
+        @subscriptions.add atom.commands.add 'atom-workspace', 'atom-sync:download': (e) =>
+            @downloadDirectory atom.workspace.getLeftPanels()[0].getItem().selectedPaths()[0]
+        @subscriptions.add atom.commands.add 'atom-workspace', 'atom-sync:upload': (e) =>
+            @uploadDirectory atom.workspace.getLeftPanels()[0].getItem().selectedPaths()[0]
+        @subscriptions.add atom.commands.add 'atom-workspace', 'atom-sync:show-panel': (e) =>
+            @bottomPanel.show()
+        @subscriptions.add atom.commands.add 'atom-workspace', 'atom-sync:close-panel': (e) =>
+            @bottomPanel.hide()
 
         if @config isnt null
             if @config.behaviour.uploadOnSave is true
                 @subscriptions.add atom.workspace.observeTextEditors (editor) =>
                     onDidSave = editor.onDidSave (e) =>
-                        if not @isExclude e.path.replace(@root, '')
-                            @upload()
-                            # @TODO upload single file
+                        @uploadFile e.path
             if @config.behaviour.syncDownOnOpen is true
                 @subscriptions.add atom.workspace.onDidOpen (e) =>
-                    if not @isExclude e.uri.replace(@root, '')
-                        @download()
-                        atom.workspace.reopenItem()
-                        # @TODO download single file
+                        @downloadFile e.uri
 
     deactivate: ->
-        @modalPanel.destroy()
+        @bottomPanel.destroy()
         @subscriptions.dispose()
-        @atomSyncView.destroy()
+        @consoleView.destroy()
 
     serialize: ->
-        atomSyncViewState: @atomSyncView.serialize()
+        consoleView: @consoleView.serialize()
 
     configure: (e) ->
         if not fs.isFileSync @configFile
             sample = cson.createCSONString @sampleConfig
             fs.writeFileSync @configFile, sample
 
-        atom.workspace.open( @configFile)
-        # if not @modalPanel.isVisible()
-        #     @modalPanel.show()
-        #     setTimeout (=> @modalPanel.hide()), 1000
+        atom.workspace.open @configFile
 
-    # @TODO rename to downloadAll
-    download: ->
-        if not @loadConfig()
-            atom.notifications.addError "You must create remote config first"
-            return
-
-        remote = "#{@config.remote.user}@#{@config.remote.host}:#{@config.remote.path}"
-        @sync(remote, @root, @config.option)
-
-    # @TODO rename to uploadAll
-    upload: ->
-        if not @loadConfig()
-            atom.notifications.addError "You must create remote config first"
-            return
-
-        remote = "#{@config.remote.user}@#{@config.remote.host}:#{@config.remote.path}"
-        @sync(@root, remote, @config.option)
-
-    # @TODO download specific file
-    # @TODO upload specific file
-    # @TODO confirm dialogue
-
-    sync: (src, dst, opt = {}) ->
-        console.log "Syncing from #{src} to #{dst}..."
-        flags = opt.flags ? 'avzp'
-        rsync = new Rsync()
-            .shell 'ssh'
-            .flags flags
-            .source "#{src}/"
-            .destination dst.replace(/\/$/, '')
-            .output (data) -> console.log data.toString('utf-8').trim()
-
-        rsync.delete() if opt.deleteFiles?
-        rsync.exclude opt.exclude if opt.exclude?
-        rsync.execute (err, code, cmd) ->
-            atom.notifications.addError "#{err.message}, please review your config file." if err
+    getRelativePath: (base, fullpath) ->
+        fullpath.replace new RegExp('^'+base.replace(/([.?*+^$[\]\\/(){}|-])/g, "\\$1")), ''
 
     loadConfig: ->
         if fs.isFileSync @configFile
@@ -112,11 +73,68 @@ module.exports = AtomSync =
             return true
         return false
 
-    isExclude: (str) ->
-        for pattern in _.union @config.option.exclude, [@configFileName]
-            if (str.indexOf pattern) isnt -1
-                return true
+    assertConfig: ->
+        if not @loadConfig()
+            atom.notifications.addError "You must create remote config first"
+            return
+
+    isExcluded: (str) ->
+        return true if (str.indexOf pattern) isnt -1 for pattern in _.union @config.option.exclude
         return false
+
+    downloadFile: (f) ->
+        @assertConfig()
+        return if @isExcluded (@getRelativePath @root, f)
+        src = "#{@config.remote.user}@#{@config.remote.host}:" + path.join @config.remote.path, (@getRelativePath @root, f)
+        dst = (path.dirname f) + '/'
+        @sync src, dst, @config.option
+
+    uploadFile: (f) ->
+        @assertConfig()
+        return if @isExcluded (@getRelativePath @root, f)
+        src = f
+        dst = "#{@config.remote.user}@#{@config.remote.host}:" + path.dirname path.join @config.remote.path, (@getRelativePath @root, f)
+        @sync src, dst, @config.option
+
+    downloadDirectory: (d) ->
+        @assertConfig()
+        return if @isExcluded (@getRelativePath @root, d)
+        src = "#{@config.remote.user}@#{@config.remote.host}:" + (path.join @config.remote.path, (@getRelativePath @root, d)) + '/'
+        dst = path.normalize d
+        @sync src, dst, @config.option
+
+    uploadDirectory: (d) ->
+        @assertConfig()
+        return if @isExcluded (@getRelativePath @root, d)
+        src = "#{d}/"
+        dst = "#{@config.remote.user}@#{@config.remote.host}:" + path.join @config.remote.path, (@getRelativePath @root, d)
+        @sync src, dst, @config.option
+
+    # @TODO confirm dialogue
+
+    sync: (src, dst, opt = {}) ->
+        @bottomPanel.show() if not @config.behaviour.forgetConsole
+        @consoleView.log "\n\nSyncing from #{src} to #{dst}..."
+        rsync = new Rsync()
+            .shell 'ssh'
+            .flags 'avzpu'
+            .source src
+            .destination dst
+            .output (data) => @consoleView.log data.toString('utf-8').trim()
+
+        rsync.delete() if opt.deleteFiles?
+        rsync.exclude opt.exclude if opt.exclude?
+        rsync.execute (err, code, cmd) =>
+            if err
+                atom.notifications.addError "#{err.message}, please review your config file." if err
+                console.log cmd
+            else
+                @consoleView.log "\n\nSync completed without error.\n"
+                # if not @config.behaviour.forgetConsole
+                    # setTimeout =>
+                    #     @bottomPanel.hide()
+                    # , 3000
+
 
     sampleConfig:
         remote:
@@ -126,6 +144,7 @@ module.exports = AtomSync =
         behaviour:
             uploadOnSave: true
             syncDownOnOpen: true
+            forgetConsole: false
         option:
             deleteFiles: true
             exclude: [

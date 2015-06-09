@@ -10,8 +10,11 @@
     "atom": ">=0.174.0 <2.0.0"
   },
   "dependencies": {
+    "atom-space-pen-views": "^2.0.3",
     "cson": "^3.0.1",
     "fs-plus": "^2.8.1",
+    "mixto": "^1.0.0",
+    "property-accessors": "^1.1.3",
     "rsync": "^0.4.0",
     "underscore": "^1.8.3"
   }
