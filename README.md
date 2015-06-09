@@ -2,7 +2,9 @@
 
 The package is currently in early development and has only been tested in Mac, USE IT AT YOUR OWN RISK.
 
-### Quick Guide ###
+![Quick Start](https://cloud.githubusercontent.com/assets/586262/8066160/9c7764f6-0f18-11e5-9352-3e25c7f655f8.gif)
+
+### Quick Start ###
 * Install atom-sync from where you found it
 * Open a directory you are going to sync in [Atom](http://atom.io)
 * Right click on the directory and select "Sync" -> "Edit Remote Config"
