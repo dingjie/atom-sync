@@ -13,6 +13,8 @@ The package is currently in early development and has only been tested on my Mac
 * Edit and save the config file.
 * Right click on the directory and select `Sync` -> `Sync Remote -> Local`.
 * Watch water flows.
+=======
+![Quick Start](https://cloud.githubusercontent.com/assets/586262/8066160/9c7764f6-0f18-11e5-9352-3e25c7f655f8.gif)
 
 ### Config File ###
 .sync-config.cson
