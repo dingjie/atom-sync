@@ -6,7 +6,7 @@ The package is currently in early development and has only been tested on my Mac
 
 *USE IT AT YOUR OWN RISK.*
 
-![Quick Start](https://cloud.githubusercontent.com/assets/586262/8066160/9c7764f6-0f18-11e5-9352-3e25c7f655f8.gif)
+![atom-sync](https://cloud.githubusercontent.com/assets/586262/8066587/feedcc68-0f1a-11e5-973e-e6b3668586fb.gif)
 
 ### Quick Start ###
 * Install atom-sync from where you find it.
