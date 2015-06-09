@@ -12,15 +12,15 @@ describe "AtomSync", ->
     workspaceElement = atom.views.getView(atom.workspace)
     activationPromise = atom.packages.activatePackage('atom-sync')
 
-  describe "when the atom-sync:toggle event is triggered", ->
-    it "hides and shows the modal panel", ->
+  describe "when the atom-sync:toggle-log-panel event is triggered", ->
+    it "hides and shows the log panel", ->
       # Before the activation event the view is not on the DOM, and no panel
       # has been created
       expect(workspaceElement.querySelector('.atom-sync')).not.toExist()
 
       # This is an activation event, triggering it will cause the package to be
       # activated.
-      atom.commands.dispatch workspaceElement, 'atom-sync:toggle'
+      atom.commands.dispatch workspaceElement, 'atom-sync:toggle-log-panel'
 
       waitsForPromise ->
         activationPromise
@@ -33,7 +33,7 @@ describe "AtomSync", ->
 
         atomSyncPanel = atom.workspace.panelForItem(atomSyncElement)
         expect(atomSyncPanel.isVisible()).toBe true
-        atom.commands.dispatch workspaceElement, 'atom-sync:toggle'
+        atom.commands.dispatch workspaceElement, 'atom-sync:toggle-log-panel'
         expect(atomSyncPanel.isVisible()).toBe false
 
     it "hides and shows the view", ->
@@ -49,7 +49,7 @@ describe "AtomSync", ->
 
       # This is an activation event, triggering it causes the package to be
       # activated.
-      atom.commands.dispatch workspaceElement, 'atom-sync:toggle'
+      atom.commands.dispatch workspaceElement, 'atom-sync:toggle-log-panel'
 
       waitsForPromise ->
         activationPromise
@@ -58,5 +58,5 @@ describe "AtomSync", ->
         # Now we can test for view visibility
         atomSyncElement = workspaceElement.querySelector('.atom-sync')
         expect(atomSyncElement).toBeVisible()
-        atom.commands.dispatch workspaceElement, 'atom-sync:toggle'
+        atom.commands.dispatch workspaceElement, 'atom-sync:toggle-log-panel'
         expect(atomSyncElement).not.toBeVisible()

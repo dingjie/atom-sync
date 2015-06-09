@@ -24,11 +24,6 @@ module.exports = AtomSync =
 
         @loadConfig()
 
-        @consoleView = new ConsoleView state.consoleViewState
-        @bottomPanel = atom.workspace.addBottomPanel item: @consoleView.element, visible: false
-        @consoleView.close =>
-            @bottomPanel.hide()
-
         @subscriptions = new CompositeDisposable
         @subscriptions.add atom.commands.add '.tree-view.full-menu .header.list-item', 'atom-sync:configure': (e) =>
             @configure()
@@ -40,13 +35,13 @@ module.exports = AtomSync =
             @uploadDirectory atom.workspace.getLeftPanels()[0].getItem().selectedPaths()[0]
 
         @subscriptions.add atom.commands.add 'atom-workspace', 'atom-sync:toggle-log-panel': (e) =>
-            if @bottomPanel.isVisible() then @bottomPanel.hide() else @bottomPanel.show()
+            if @bottomPanel isnt null and @bottomPanel.isVisible() then @hide() else @show()
 
         @subscriptions.add atom.commands.add 'atom-workspace', 'atom-sync:show-log-panel': (e) =>
-            @bottomPanel.show()
+            @show()
 
         @subscriptions.add atom.commands.add 'atom-workspace', 'atom-sync:close-log-panel': (e) =>
-            @bottomPanel.hide()
+            @hide()
 
         if @config isnt null
             if @config.behaviour.uploadOnSave is true
@@ -57,6 +52,18 @@ module.exports = AtomSync =
             if @config.behaviour.syncDownOnOpen is true
                 @subscriptions.add atom.workspace.onDidOpen (e) =>
                     @downloadFile e.uri
+
+    show: ->
+        if @bottomPanel is null
+            @consoleView = new ConsoleView()
+            @bottomPanel = atom.workspace.addBottomPanel item: @consoleView.element
+            @consoleView.close =>
+                @hide()
+        else
+            @bottomPanel.show()
+
+    hide: ->
+        @bottomPanel.hide() if @bottomPanel isnt null
 
     deactivate: ->
         @bottomPanel.destroy()
@@ -136,8 +143,8 @@ module.exports = AtomSync =
     # @TODO confirm dialogue
 
     sync: (src, dst, opt = {}, cb = null) ->
-        @bottomPanel.show() if not @config.behaviour.forgetConsole
-        @consoleView.log "<span class='info'>Syncing from #{src} to #{dst}</span> ..."
+        @show() if not @config.behaviour.forgetConsole
+        @consoleView.log "<span class='info'>Syncing from #{src} to #{dst}</span> ..." if @consoleView isnt null
         rsync = new Rsync()
             .shell 'ssh'
             .flags 'avzpu'
@@ -152,9 +159,9 @@ module.exports = AtomSync =
                 atom.notifications.addError "#{err.message}, please review your config file." if err
                 console.error cmd
             else
-                @consoleView.log "<span class='success'>Sync completed without error.</spane>\n"
+                @consoleView.log "<span class='success'>Sync completed without error.</spane>\n" if @consoleView isnt null
                 if @config.behaviour.autoHideConsole
-                    setTimeout (=> @bottomPanel.hide()), 1500
+                    setTimeout (=> @hide()), 1500
 
 
     sampleConfig:
