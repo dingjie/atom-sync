@@ -24,31 +24,35 @@ module.exports = AtomSync =
 
         @loadConfig()
 
-        @consoleView = new ConsoleView(state.consoleViewState)
-        @bottomPanel = atom.workspace.addBottomPanel(item: @consoleView.element, visible: false)
+        @consoleView = new ConsoleView state.consoleViewState
+        @bottomPanel = atom.workspace.addBottomPanel item: @consoleView.element, visible: false
         @consoleView.close =>
             @bottomPanel.hide()
 
         @subscriptions = new CompositeDisposable
         @subscriptions.add atom.commands.add '.tree-view.full-menu .header.list-item', 'atom-sync:configure': (e) =>
             @configure()
+
         @subscriptions.add atom.commands.add 'atom-workspace', 'atom-sync:download': (e) =>
             @downloadDirectory atom.workspace.getLeftPanels()[0].getItem().selectedPaths()[0]
+
         @subscriptions.add atom.commands.add 'atom-workspace', 'atom-sync:upload': (e) =>
             @uploadDirectory atom.workspace.getLeftPanels()[0].getItem().selectedPaths()[0]
+
         @subscriptions.add atom.commands.add 'atom-workspace', 'atom-sync:show-panel': (e) =>
             @bottomPanel.show()
+
         @subscriptions.add atom.commands.add 'atom-workspace', 'atom-sync:close-panel': (e) =>
             @bottomPanel.hide()
 
         if @config isnt null
             if @config.behaviour.uploadOnSave is true
                 @subscriptions.add atom.workspace.observeTextEditors (editor) =>
-                    onDidSave = editor.onDidSave (e) =>
-                        @uploadFile e.path
+                    onDidSave = editor.onDidSave (e) => @uploadFile e.path
+
             if @config.behaviour.syncDownOnOpen is true
                 @subscriptions.add atom.workspace.onDidOpen (e) =>
-                        @downloadFile e.uri
+                    @downloadFile e.uri
 
     deactivate: ->
         @bottomPanel.destroy()
@@ -86,30 +90,38 @@ module.exports = AtomSync =
 
     downloadFile: (f) ->
         @assertConfig()
-        return if @isExcluded (@getRelativePath @root, f)
-        src = "#{@config.remote.user}@#{@config.remote.host}:" + path.join @config.remote.path, (@getRelativePath @root, f)
+        relativePath = @getRelativePath @root, f
+        return if @isExcluded relativePath
+
+        src = "#{@config.remote.user}@#{@config.remote.host}:" + path.join @config.remote.path, relativePath
         dst = (path.dirname f) + '/'
         @sync src, dst, @config.option
 
     uploadFile: (f) ->
         @assertConfig()
-        return if @isExcluded (@getRelativePath @root, f)
+        relativePath = @getRelativePath @root, f
+        return if @isExcluded relativePath
+
         src = f
-        dst = "#{@config.remote.user}@#{@config.remote.host}:" + path.dirname path.join @config.remote.path, (@getRelativePath @root, f)
+        dst = "#{@config.remote.user}@#{@config.remote.host}:" + path.dirname path.join @config.remote.path, relativePath
         @sync src, dst, @config.option
 
     downloadDirectory: (d) ->
         @assertConfig()
-        return if @isExcluded (@getRelativePath @root, d)
-        src = "#{@config.remote.user}@#{@config.remote.host}:" + (path.join @config.remote.path, (@getRelativePath @root, d)) + '/'
+        relativePath = @getRelativePath @root, d
+        return if @isExcluded relativePath
+
+        src = "#{@config.remote.user}@#{@config.remote.host}:" + (path.join @config.remote.path, relativePath) + '/'
         dst = path.normalize d
         @sync src, dst, @config.option
 
     uploadDirectory: (d) ->
         @assertConfig()
-        return if @isExcluded (@getRelativePath @root, d)
+        relativePath = @getRelativePath @root, d
+        return if @isExcluded relativePath
+        
         src = "#{d}/"
-        dst = "#{@config.remote.user}@#{@config.remote.host}:" + path.join @config.remote.path, (@getRelativePath @root, d)
+        dst = "#{@config.remote.user}@#{@config.remote.host}:" + path.join @config.remote.path, relativePath
         @sync src, dst, @config.option
 
     # @TODO confirm dialogue
