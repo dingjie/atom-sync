@@ -27,6 +27,7 @@ module.exports = AtomSync =
         @subscriptions = new CompositeDisposable
         @subscriptions.add atom.commands.add '.tree-view.full-menu .header.list-item', 'atom-sync:configure': (e) =>
             @configure()
+            # console.log @findActiveRoot()
 
         @subscriptions.add atom.commands.add 'atom-workspace', 'atom-sync:download-directory': (e) =>
             @downloadDirectory atom.workspace.getLeftPanels()[0].getItem().selectedPaths()[0]
@@ -64,6 +65,13 @@ module.exports = AtomSync =
 
     hide: ->
         @bottomPanel.hide() if @bottomPanel isnt null
+
+    findActiveRoot: ->
+        roots = atom.project.rootDirectories
+        selected = atom.workspace.getLeftPanels()[0].getItem().selectedPaths()[0]
+        for dir in roots
+            if (@getRelativePath dir.path, selected) isnt selected
+                return dir.path
 
     deactivate: ->
         @bottomPanel.destroy()

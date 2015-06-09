@@ -46,6 +46,7 @@ option:
 
 ### Known Problems ###
 * You have to `Sync Local -> Remote` manually after renaming and deleteing files.
+* Mutiple folders in a project is temporarily not supported.
 
 ### Roadmap ###
 * Listen to events
