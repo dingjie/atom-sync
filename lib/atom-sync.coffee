@@ -20,7 +20,7 @@ module.exports = AtomSync =
             return
 
         @root = atom.project.rootDirectories[0].path
-        @configFile = path.join @root, 'sync-config.cson'
+        @configFile = path.join @root, '.sync-config.cson'
 
         @loadConfig()
 
@@ -81,7 +81,8 @@ module.exports = AtomSync =
     assertConfig: ->
         if not @loadConfig()
             atom.notifications.addError "You must create remote config first"
-            return
+            return false
+        return true
 
     isExcluded: (str) ->
         for pattern in @config.option.exclude
@@ -89,7 +90,7 @@ module.exports = AtomSync =
         return false
 
     downloadFile: (f) ->
-        @assertConfig()
+        return if not @assertConfig()
         relativePath = @getRelativePath @root, f
         return if @isExcluded relativePath
 
@@ -98,7 +99,7 @@ module.exports = AtomSync =
         @sync src, dst, @config.option
 
     uploadFile: (f) ->
-        @assertConfig()
+        return if not @assertConfig()
         relativePath = @getRelativePath @root, f
         return if @isExcluded relativePath
 
@@ -107,7 +108,7 @@ module.exports = AtomSync =
         @sync src, dst, @config.option
 
     downloadDirectory: (d) ->
-        @assertConfig()
+        return if not @assertConfig()
         relativePath = @getRelativePath @root, d
         return if @isExcluded relativePath
 
@@ -116,10 +117,10 @@ module.exports = AtomSync =
         @sync src, dst, @config.option
 
     uploadDirectory: (d) ->
-        @assertConfig()
+        return if not @assertConfig()
         relativePath = @getRelativePath @root, d
         return if @isExcluded relativePath
-        
+
         src = "#{d}/"
         dst = "#{@config.remote.user}@#{@config.remote.host}:" + path.join @config.remote.path, relativePath
         @sync src, dst, @config.option
@@ -161,7 +162,7 @@ module.exports = AtomSync =
         option:
             deleteFiles: true
             exclude: [
-                'sync-config.cson'
+                '.sync-config.cson'
                 '.git'
                 'node_modules'
                 'tmp'
