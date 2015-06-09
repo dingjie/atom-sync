@@ -5,12 +5,13 @@ The package is currently in early development and has only been tested in Mac, U
 ### Quick Guide ###
 * Install atom-sync from where you found it
 * Open a directory you are going to sync in [Atom](http://atom.io)
-* Right click on the directory and select "Sync" -> "Edit Remote Config"
+* Right click on the directory and select `Sync` -> `Edit Remote Config`
 * Edit and save the config file
-* Right click on the directory and select "Sync" -> "Sync Remote -> Local"
+* Right click on the directory and select `Sync` -> `Sync Remote -> Local`
 * Watch water flows
 
 ### Config File ###
+.sync-config.cson
 ```
 remote:
     host: "HOSTNAME",       # server name or ip or ssh host in .ssh/config
