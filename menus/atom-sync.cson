@@ -17,3 +17,21 @@
             }
         ]
     ]
+
+    '.tree-view.full-menu .file.list-item': [
+        'label': 'Sync'
+        'submenu': [
+            {
+                'label': 'Edit Remote Config'
+                'command': 'atom-sync:configure'
+            }
+            {
+                'label': 'Download File'
+                'command': 'atom-sync:download-file'
+            }
+            {
+                'label': 'Upload File'
+                'command': 'atom-sync:upload-file'
+            }
+        ]
+    ]

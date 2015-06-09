@@ -11,23 +11,11 @@ module.exports = AtomSync =
     consoleView: null
     bottomPanel: null
     subscriptions: null
-    configFile: null
-    config: null
-    root: null
 
     activate: (state) ->
-        if atom.project.rootDirectories.length < 1
-            return
-
-        @root = atom.project.rootDirectories[0].path
-        @configFile = path.join @root, '.sync-config.cson'
-
-        @loadConfig()
-
         @subscriptions = new CompositeDisposable
         @subscriptions.add atom.commands.add '.tree-view.full-menu .header.list-item', 'atom-sync:configure': (e) =>
             @configure()
-            # console.log @findActiveRoot()
 
         @subscriptions.add atom.commands.add 'atom-workspace', 'atom-sync:download-directory': (e) =>
             @downloadDirectory atom.workspace.getLeftPanels()[0].getItem().selectedPaths()[0]
@@ -35,24 +23,22 @@ module.exports = AtomSync =
         @subscriptions.add atom.commands.add 'atom-workspace', 'atom-sync:upload-directory': (e) =>
             @uploadDirectory atom.workspace.getLeftPanels()[0].getItem().selectedPaths()[0]
 
+        @subscriptions.add atom.commands.add 'atom-workspace', 'atom-sync:download-file': (e) =>
+            @downloadFile atom.workspace.getLeftPanels()[0].getItem().selectedPaths()[0]
+
+        @subscriptions.add atom.commands.add 'atom-workspace', 'atom-sync:upload-file': (e) =>
+            @uploadFile atom.workspace.getLeftPanels()[0].getItem().selectedPaths()[0]
+
         @subscriptions.add atom.commands.add 'atom-workspace', 'atom-sync:toggle-log-panel': (e) =>
             if @bottomPanel isnt null and @bottomPanel.isVisible() then @hide() else @show()
 
-        @subscriptions.add atom.commands.add 'atom-workspace', 'atom-sync:show-log-panel': (e) =>
-            @show()
+        if not @loadConfig
+            @subscriptions.add atom.workspace.observeTextEditors (editor) =>
+                editor.onDidSave (e) =>
+                    @uploadFile e.path
 
-        @subscriptions.add atom.commands.add 'atom-workspace', 'atom-sync:close-log-panel': (e) =>
-            @hide()
-
-        if @config isnt null
-            if @config.behaviour.uploadOnSave is true
-                @subscriptions.add atom.workspace.observeTextEditors (editor) =>
-                    editor.onDidSave (e) =>
-                        @uploadFile e.path
-
-            if @config.behaviour.syncDownOnOpen is true
-                @subscriptions.add atom.workspace.onDidOpen (e) =>
-                    @downloadFile e.uri
+            @subscriptions.add atom.workspace.onDidOpen (e) =>
+                @downloadFile e.uri
 
     show: ->
         if @bottomPanel is null
@@ -66,7 +52,10 @@ module.exports = AtomSync =
     hide: ->
         @bottomPanel.hide() if @bottomPanel isnt null
 
-    findActiveRoot: ->
+    getCurrentRootDirectory: ->
+        if atom.project.rootDirectories.length < 1
+            return
+
         roots = atom.project.rootDirectories
         selected = atom.workspace.getLeftPanels()[0].getItem().selectedPaths()[0]
         for dir in roots
@@ -82,76 +71,80 @@ module.exports = AtomSync =
         consoleView: @consoleView.serialize()
 
     configure: (e) ->
-        if not fs.isFileSync @configFile
+        configFile =  @getConfigFilePath()
+        if not fs.isFileSync configFile
             sample = cson.createCSONString @sampleConfig
-            fs.writeFileSync @configFile, sample
+            fs.writeFileSync configFile, sample
 
-        atom.workspace.open @configFile
+        atom.workspace.open configFile
 
     getRelativePath: (base, fullpath) ->
         fullpath.replace new RegExp('^'+base.replace(/([.?*+^$[\]\\/(){}|-])/g, "\\$1")), ''
 
+    getConfigFilePath: ->
+        configFile = path.join @getCurrentRootDirectory(), '.sync-config.cson'
+
     loadConfig: ->
-        if fs.isFileSync @configFile
-            @config = cson.load @configFile
-            return true
-        return false
+        configFile = @getConfigFilePath()
+        if fs.isFileSync configFile
+            return cson.load configFile
+        return null
 
     assertConfig: ->
-        if not @loadConfig()
-            atom.notifications.addError "You must create remote config first"
-            return false
-        return true
+        config = @loadConfig()
+        if not config
+            throw new Error "You must create remote config first"
+        return config
 
-    isExcluded: (str) ->
-        for pattern in @config.option.exclude
+    isExcluded: (str, exclude) ->
+        for pattern in exclude
             return true if (str.indexOf pattern) isnt -1
         return false
 
     downloadFile: (f) ->
         return if not fs.isFileSync f
-        return if not @assertConfig()
-        relativePath = @getRelativePath @root, f
-        return if @isExcluded relativePath
+        config = @assertConfig()
+        relativePath = @getRelativePath @getCurrentRootDirectory(), f
+        return if @isExcluded relativePath, config.option.exclude
 
-        src = "#{@config.remote.user}@#{@config.remote.host}:" + path.join @config.remote.path, relativePath
+        src = "#{config.remote.user}@#{config.remote.host}:" + path.join config.remote.path, relativePath
         dst = (path.dirname f) + '/'
-        @sync src, dst, @config.option
+        @sync src, dst, config
 
     uploadFile: (f) ->
         return if not fs.isFileSync f
-        return if not @assertConfig()
-        relativePath = @getRelativePath @root, f
-        return if @isExcluded relativePath
+        config = @assertConfig()
+        relativePath = @getRelativePath @getCurrentRootDirectory(), f
+        return if @isExcluded relativePath, config.option.exclude
 
         src = f
-        dst = "#{@config.remote.user}@#{@config.remote.host}:" + path.dirname path.join @config.remote.path, relativePath
-        @sync src, dst, @config.option
+        dst = "#{config.remote.user}@#{config.remote.host}:" + path.dirname path.join config.remote.path, relativePath
+        @sync src, dst, config
 
     downloadDirectory: (d) ->
         return if not fs.isDirectorySync d
-        return if not @assertConfig()
-        relativePath = @getRelativePath @root, d
-        return if @isExcluded relativePath
+        config = @assertConfig()
+        relativePath = @getRelativePath @getCurrentRootDirectory(), d
+        return if @isExcluded relativePath, config.option.exclude
 
-        src = "#{@config.remote.user}@#{@config.remote.host}:" + (path.join @config.remote.path, relativePath) + '/'
+        src = "#{config.remote.user}@#{config.remote.host}:" + (path.join config.remote.path, relativePath) + '/'
         dst = path.normalize d
-        @sync src, dst, @config.option
+        @sync src, dst, config
 
     uploadDirectory: (d) ->
         return if not fs.isDirectorySync d
-        return if not @assertConfig()
-        relativePath = @getRelativePath @root, d
-        return if @isExcluded relativePath
+        config = @assertConfig()
+        relativePath = @getRelativePath @getCurrentRootDirectory(), d
+        return if @isExcluded relativePath, config.option.exclude
 
         src = "#{d}/"
-        dst = "#{@config.remote.user}@#{@config.remote.host}:" + path.join @config.remote.path, relativePath
-        @sync src, dst, @config.option
+        dst = "#{config.remote.user}@#{config.remote.host}:" + path.join config.remote.path, relativePath
+        @sync src, dst, config
 
     # @TODO confirm dialogue
 
-    sync: (src, dst, opt = {}, cb = null) ->
-        @show() if not @config.behaviour.forgetConsole
+    sync: (src, dst, config = {}) ->
+        @show() if not config.behaviour.forgetConsole
         @consoleView.log "<span class='info'>Syncing from #{src} to #{dst}</span> ..." if @consoleView isnt null
         rsync = new Rsync()
             .shell 'ssh'
@@ -160,15 +153,15 @@ module.exports = AtomSync =
             .destination dst
             .output (data) => @consoleView.log data.toString('utf-8').trim()
 
-        rsync.delete() if opt.deleteFiles?
-        rsync.exclude opt.exclude if opt.exclude?
+        rsync.delete() if config.option.deleteFiles?
+        rsync.exclude config.option.exclude if config.option.exclude?
         rsync.execute (err, code, cmd) =>
             if err
                 atom.notifications.addError "#{err.message}, please review your config file." if err
                 console.error cmd
             else
                 @consoleView.log "<span class='success'>Sync completed without error.</spane>\n" if @consoleView isnt null
-                if @config.behaviour.autoHideConsole
+                if config.behaviour.autoHideConsole
                     setTimeout (=> @hide()), 1500
 
 
