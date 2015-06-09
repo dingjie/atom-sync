@@ -32,13 +32,12 @@ module.exports = AtomSync =
         @subscriptions.add atom.commands.add 'atom-workspace', 'atom-sync:toggle-log-panel': (e) =>
             if @bottomPanel isnt null and @bottomPanel.isVisible() then @hide() else @show()
 
-        if not @loadConfig
-            @subscriptions.add atom.workspace.observeTextEditors (editor) =>
-                editor.onDidSave (e) =>
-                    @uploadFile e.path
+        @subscriptions.add atom.workspace.observeTextEditors (editor) =>
+            editor.onDidSave (e) =>
+                @uploadEditingFile e.path
 
-            @subscriptions.add atom.workspace.onDidOpen (e) =>
-                @downloadFile e.uri
+        @subscriptions.add atom.workspace.onDidOpen (e) =>
+            @downloadOpeningFile e.uri
 
     show: ->
         if @bottomPanel is null
@@ -51,6 +50,17 @@ module.exports = AtomSync =
 
     hide: ->
         @bottomPanel.hide() if @bottomPanel isnt null
+
+    uploadEditingFile: (f) ->
+        config = @loadConfig()
+        if config and config.behaviour.uploadOnSave
+            @uploadFile(f)
+
+    downloadOpeningFile: (f) ->
+        config = @loadConfig()
+        if config and config.behaviour.syncDownOnOpen
+            @downloadFile(f)
+
 
     getCurrentRootDirectory: ->
         if atom.project.rootDirectories.length < 1
