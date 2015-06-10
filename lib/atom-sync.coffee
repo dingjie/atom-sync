@@ -93,9 +93,7 @@ module.exports = AtomSync =
 
     getRelativePath: (base, fullpath) ->
         return if not base or not fullpath
-        relativePath = fullpath.replace new RegExp('^'+base.replace(/([.?*+^$[\]\\/(){}|-])/g, "\\$1")), ''
-        return if relativePath == fullpath
-        return relativePath
+        fullpath.replace new RegExp('^'+base.replace(/([.?*+^$[\]\\/(){}|-])/g, "\\$1")), ''
 
     getConfigFilePath: ->
         root = @getCurrentRootDirectory()
