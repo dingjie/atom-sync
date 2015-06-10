@@ -15,7 +15,7 @@ module.exports = (opt = {}) ->
         .source src
         .destination dst
         .output (data) ->
-            progress data.toString('utf-8').trim()
+            progress? data.toString('utf-8').trim()
 
     rsync.delete() if config.option?.deleteFiles?
     rsync.exclude config.option.exclude if config?.option?.exclude

@@ -4,13 +4,14 @@ path = require 'path'
 cson = require 'CSON'
 fs = require 'fs-plus'
 
-# @TODO refactor and foolproof
+# TODO refactor and foolproof
 
 module.exports = AtomSync =
     consoleView: null
     bottomPanel: null
     subscriptions: null
 
+    # TODO To be refactored
     activate: (state) ->
         @subscriptions = new CompositeDisposable
         @subscriptions.add atom.commands.add '.tree-view.full-menu .header.list-item', 'atom-sync:configure': (e) =>
@@ -37,6 +38,11 @@ module.exports = AtomSync =
 
         @subscriptions.add atom.workspace.onDidOpen (e) =>
             @downloadOpeningFile e.uri
+
+    # TODO To be refactored
+
+    log: (msg) ->
+        @consoleView.log msg if @consoleView?
 
     show: ->
         if @bottomPanel is null
@@ -112,10 +118,14 @@ module.exports = AtomSync =
             throw new Error "You must create remote config first"
         return config
 
+    # TODO Should match exclude pattern in the same way as node-rsync does
+
     isExcluded: (str, exclude) ->
         for pattern in exclude
             return true if (str.indexOf pattern) isnt -1
         return false
+
+    # TODO Following 4 funcs should be integrated in some way
 
     downloadFile: (f) ->
         return if not fs.isFileSync f
@@ -157,7 +167,7 @@ module.exports = AtomSync =
         dst = "#{config.remote.user}@#{config.remote.host}:" + path.join config.remote.path, relativePath
         @sync src, dst, config
 
-    # @TODO confirm dialogue
+    # TODO confirm dialogue
 
     sync: (src, dst, config = {}) ->
         @show() if not config.behaviour.forgetConsole
@@ -175,8 +185,7 @@ module.exports = AtomSync =
                 atom.notifications.addError "#{err}, please review your config file."
                 console.error cmd
 
-    log: (msg) ->
-        @consoleView.log msg if @consoleView?
+    # TODO Should be store in a static file for comments
 
     sampleConfig:
         remote:
