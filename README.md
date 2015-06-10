@@ -4,11 +4,16 @@ atom-sync is an Atom package to sync files bidirectionally between remote host a
 
 [![experimental](http://badges.github.io/stability-badges/dist/experimental.svg)](http://github.com/badges/stability-badges)[![Build Status](https://travis-ci.org/dingjie/atom-sync.svg?branch=master)](https://travis-ci.org/dingjie/atom-sync)
 
-The package is currently in early development and has only been tested on my Mac. Please try it out and provide feedback.
-
-Please ensure you have `ssh` and `rsync` installed.
+> This package is currently in early development and has only been tested on Mac. Please kindly [try it out](http://atom.io/packages/atom-sync) and [provide feedback](https://github.com/dingjie/atom-sync/issues/new).
 
 ![atom-sync](https://cloud.githubusercontent.com/assets/586262/8066587/feedcc68-0f1a-11e5-973e-e6b3668586fb.gif)
+
+### Feature ###
+* Sync over ssh+rsync — still [secure](http://www.sakana.fr/blog/2008/05/07/securing-automated-rsync-over-ssh/), but much [faster](http://stackoverflow.com/questions/20244585/what-is-the-difference-between-scp-and-rsync).
+* [Multi-Folder Projects](http://blog.atom.io/2015/04/15/multi-folder-projects.html) with different sync config files supported
+
+### Prerequisite ###
+* Ensure you have `ssh` and `rsync` installed.
 
 ### Quick Start ###
 * Open a directory you are going to sync in [Atom](http://atom.io).
@@ -17,8 +22,12 @@ Please ensure you have `ssh` and `rsync` installed.
 * Right click on the directory and select `Sync` -> `Sync Remote -> Local`.
 * Watch water flows.
 
+### Notice ###
+* Password based login is not supported—at least yet, you have to assign your key file and better host name in .ssh/config in advanced. Try to [Simplify Your Life With an SSH Config File](http://nerderati.com/2011/03/17/simplify-your-life-with-an-ssh-config-file/).
+
 ### Config File ###
-.sync-config.cson
+> .sync-config.cson
+
 ```
 remote:
     host: "HOSTNAME",       # server name or ip or ssh host abbr in .ssh/config
@@ -42,19 +51,18 @@ option:
     ]
 ```
 
-### Shortcut ###
+### Keybindings ###
 * `ctrl`+`alt`+`l` Toggle log window
-
-### Notice ###
-* Password based login is not supported, you have to assign your key file and better host name in .ssh/config in advanced. Try to [Simplify Your Life With an SSH Config File](http://nerderati.com/2011/03/17/simplify-your-life-with-an-ssh-config-file/).
 
 ### Known Problems ###
 * You have to `Sync Local -> Remote` manually after renaming and deleteing files.
 
 ### Roadmap ###
+* Refactoring
 * ConsoleView::clean() and btnClean
 * --list-only and confirm dialogue
 * Listen to events
   * Create folders
   * Rename files/folders
-* SSH parameters in config file e.g. public key assignment, port et al.
+  * What about deleting?
+* SSH parameters in config file e.g. public key, port et al.
