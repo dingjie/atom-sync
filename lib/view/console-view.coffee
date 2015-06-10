@@ -5,9 +5,15 @@ class ConsoleView extends View
     @content: ->
         @div class: 'atom-sync', =>
             @div class: 'header', "Sync Console", =>
-                @div class: 'btn_close', 'x'
+                @div class: 'btn_close', String.fromCharCode(0xf081)
+                @div class: 'btn_empty', String.fromCharCode(0xf0d0)
             @div class: 'console', "Ready"
 
+    initialize: ->
+        @find 'div.btn_empty'
+            .click (e) =>
+                @empty()
+                
     close: (cb) ->
         @find 'div.btn_close'
             .click (e) =>
@@ -21,4 +27,4 @@ class ConsoleView extends View
 
     empty: ->
         @find 'div.console'
-            .html ''
+            .html('')

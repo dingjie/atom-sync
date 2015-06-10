@@ -16,14 +16,14 @@ atom-sync is an Atom package to sync files bidirectionally between remote host a
 * Ensure you have `ssh` and `rsync` installed.
 
 ### Quick Start ###
-* Open a directory you are going to sync in [Atom](http://atom.io).
-* Right click on the directory and select `Sync` -> `Edit Remote Config`.
+* Open a project folder to sync in [Atom](http://atom.io).
+* Right click on the project folder and select `Sync` -> `Edit Remote Config`.
 * Edit and save the config file.
-* Right click on the directory and select `Sync` -> `Sync Remote -> Local`.
+* Right click on the project folder and select `Sync` -> `Sync Remote -> Local`.
 * Watch water flows.
 
 ### Notice ###
-* Password based login is not supported—at least yet, you have to assign your key file and better host name in .ssh/config in advanced. Try to [Simplify Your Life With an SSH Config File](http://nerderati.com/2011/03/17/simplify-your-life-with-an-ssh-config-file/).
+* Password based login is not supported—at least yet, you have to [assign your key file](https://www.linode.com/docs/security/use-public-key-authentication-with-ssh) and better host name in .ssh/config in advanced. Try to [Simplify Your Life With an SSH Config File](http://nerderati.com/2011/03/17/simplify-your-life-with-an-ssh-config-file/).
 
 ### Config File ###
 > .sync-config.cson

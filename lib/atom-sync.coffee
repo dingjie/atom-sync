@@ -1,10 +1,11 @@
-ConsoleView = require './view/console'
 {CompositeDisposable} = require 'atom'
 
 path = require 'path'
-cson = require 'CSON'
 fs = require 'fs-plus'
-log = require './helper/logger'
+log = require './helper/logger-helper'
+
+consoleHelper = require './helper/console-helper'
+configHelper = require './helper/config-helper'
 
 # TODO refactor and foolproof
 
@@ -13,9 +14,9 @@ module.exports = AtomSync =
     bottomPanel: null
     subscriptions: null
 
+
     # TODO To be refactored
     activate: (state) ->
-        log()
         @subscriptions = new CompositeDisposable
         @subscriptions.add atom.commands.add '.tree-view.full-menu .header.list-item', 'atom-sync:configure': (e) =>
             @configure()
@@ -33,7 +34,7 @@ module.exports = AtomSync =
             @uploadFile atom.workspace.getLeftPanels()[0].getItem().selectedPaths()[0]
 
         @subscriptions.add atom.commands.add 'atom-workspace', 'atom-sync:toggle-log-panel': (e) =>
-            if @bottomPanel isnt null and @bottomPanel.isVisible() then @hide() else @show()
+            if @console.isVisible() then @console.hide() else @console.show()
 
         @subscriptions.add atom.workspace.observeTextEditors (editor) =>
             editor.onDidSave (e) =>
@@ -42,32 +43,19 @@ module.exports = AtomSync =
         @subscriptions.add atom.workspace.onDidOpen (e) =>
             @downloadOpeningFile e.uri
 
-    # TODO To be refactored
+    deactivate: ->
+        @console.destory()
 
-    log: (msg) ->
-        log msg
-        @consoleView.log msg if @consoleView?
+    serialize: ->
+        consoleView: @console.serialize()
 
-    show: ->
-        if @bottomPanel is null
-            log 'create'
-            @consoleView = new ConsoleView()
-            @bottomPanel = atom.workspace.addBottomPanel item: @consoleView.element
-            @consoleView.close =>
-                @hide()
-        else
-            @bottomPanel.show()
-            log()
+    console: consoleHelper
+    config: configHelper
 
-    hide: ->
-        if @bottomPanel isnt null
-            log()
-            @bottomPanel.hide()
-        else
-            log 'nothing to hide'
+    # TODO Should match exclude pattern in the same way as node-rsync does
 
     uploadEditingFile: (f) ->
-        config = @loadConfig()
+        config = @config.load()
         if config and config.behaviour.uploadOnSave
             log f
             @uploadFile(f)
@@ -75,113 +63,20 @@ module.exports = AtomSync =
             log 'give up'
 
     downloadOpeningFile: (f) ->
-        config = @loadConfig()
+        config = @config.load()
         if config and config.behaviour.syncDownOnOpen
             log f
             @downloadFile(f)
         else
             log 'give up'
 
-
-    getCurrentRootDirectory: ->
-        if atom.project.rootDirectories.length < 1
-            log 'no tree-view, give up'
-            return
-
-        roots = atom.project.rootDirectories
-        selected = atom.workspace.getLeftPanels()[0].getItem().selectedPaths()[0]
-
-        if not roots or not selected
-            log 'something wrong, give up'
-            return
-
-        for dir in roots
-            if (@getRelativePath dir.path, selected) isnt selected
-                log 'matched', dir.path, selected
-                return dir.path
-
-    deactivate: ->
-        log()
-        @bottomPanel.destroy()
-        @subscriptions.dispose()
-        @consoleView.destroy()
-
-    serialize: ->
-        log()
-        consoleView: @consoleView.serialize()
-
-    configure: (e) ->
-        configFile =  @getConfigFilePath()
-        if not fs.isFileSync configFile
-            log 'create', configFile
-            sample = cson.createCSONString @sampleConfig
-            fs.writeFileSync configFile, sample
-
-        log 'open', configFile
-        atom.workspace.open configFile
-
-    getRelativePath: (base, fullpath) ->
-        if not base or not fullpath
-            log 'something wrong, give up'
-            return
-
-        relativePath = fullpath.replace new RegExp('^'+base.replace(/([.?*+^$[\]\\/(){}|-])/g, "\\$1")), ''
-        if not relativePath
-            log 'find nothing'
-        else
-            log relativePath
-
-        return relativePath
-
-    getConfigFilePath: ->
-        root = @getCurrentRootDirectory()
-        if not root
-            log 'no root, give up'
-            return
-        configFile = path.join root, '.sync-config.cson'
-        log configFile
-        return configFile
-
-    loadConfig: ->
-        configFile = @getConfigFilePath()
-        if not configFile
-            log 'something wrong, give up'
-            return
-        if fs.isFileSync configFile
-            log 'configFile loaded'
-            return cson.load configFile
-
-        log 'configFile does not exist'
-        return
-
-    assertConfig: ->
-        config = @loadConfig()
-        if not config
-            log 'no config'
-            throw new Error "You must create remote config first"
-
-        log()
-        return config
-
-    # TODO Should match exclude pattern in the same way as node-rsync does
-
-    isExcluded: (str, exclude) ->
-        log str
-        for pattern in exclude
-            if (str.indexOf pattern) isnt -1
-                log pattern
-                return true
-        return false
-
-    # TODO Following 4 funcs should be integrated in some way
-
     downloadFile: (f) ->
         if not fs.isFileSync f
             log 'not a file'
             return
-        config = @assertConfig()
-        relativePath = @getRelativePath @getCurrentRootDirectory(), f
-        if @isExcluded relativePath, config.option.exclude
+        config = @config.assert()
+        relativePath = @config.getRelativePath f
+        if @config.isExcluded relativePath, config.option.exclude
             log 'excluded'
             return
 
@@ -195,9 +90,9 @@ module.exports = AtomSync =
         if not fs.isFileSync f
             log 'not a file'
             return
-        config = @assertConfig()
-        relativePath = @getRelativePath @getCurrentRootDirectory(), f
-        if @isExcluded relativePath, config.option.exclude
+        config = @config.assert()
+        relativePath = @config.getRelativePath f
+        if @config.isExcluded relativePath, config.option.exclude
             log 'excluded'
             return
 
@@ -211,9 +106,9 @@ module.exports = AtomSync =
         if not fs.isDirectorySync d
             log 'not a directory'
             return
-        config = @assertConfig()
-        relativePath = @getRelativePath @getCurrentRootDirectory(), d
-        if @isExcluded relativePath, config.option.exclude
+        config = @config.assert()
+        relativePath = @config.getRelativePath d
+        if @config.isExcluded relativePath, config.option.exclude
             log 'excluded'
             return
 
@@ -227,9 +122,9 @@ module.exports = AtomSync =
         if not fs.isDirectorySync d
             log 'not a directory'
             return
-        config = @assertConfig()
-        relativePath = @getRelativePath @getCurrentRootDirectory(), d
-        if @isExcluded relativePath, config.option.exclude
+        config = @config.assert()
+        relativePath = @config.getRelativePath d
+        if @config.isExcluded relativePath, config.option.exclude
             log 'excluded'
             return
 
@@ -239,50 +134,24 @@ module.exports = AtomSync =
         dst = "#{config.remote.user}@#{config.remote.host}:" + path.join config.remote.path, relativePath
         @sync src, dst, config
 
-    # TODO confirm dialogue
+################################################################################
 
     sync: (src, dst, config = {}) ->
-        log src, dst, config
-        @show() if not config.behaviour.forgetConsole
-        @log "<span class='info'>Syncing from #{src} to #{dst}</span> ..."
+        @console.show() if not config.behaviour.forgetConsole
+        @console.log "<span class='info'>Syncing from #{src} to #{dst}</span> ..."
 
-        (require './provider/echo')
+        (require './service/echo-service')
             src: src,
             dst: dst,
             config: config,
             progress: (msg) =>
-                log msg
-                @consoleView.log msg
+                @console.log msg
             success: =>
-                log 'success'
-                @log "<span class='success'>Sync completed without error.</span>\n"
+                @console.log "<span class='success'>Sync completed without error.</span>\n"
                 if config.behaviour.autoHideConsole
                     setTimeout =>
-                        @hide()
+                        @console.hide()
                     , 1500
             error: (err, cmd) =>
-                log err
                 atom.notifications.addError "#{err}, please review your config file."
                 console.error cmd
-
-    # TODO Should be store in a static file for comments
-
-    sampleConfig:
-        remote:
-            host: "HOSTNAME",
-            user: "USERNAME",
-            path: "REMOTE_DIR"
-        behaviour:
-            uploadOnSave: true
-            syncDownOnOpen: true
-            forgetConsole: false
-            autoHideConsole: true
-        option:
-            deleteFiles: true
-            exclude: [
-                '.sync-config.cson'
-                '.git'
-                'node_modules'
-                'tmp'
-                'vendor'
-            ]
