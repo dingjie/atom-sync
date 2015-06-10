@@ -6,7 +6,7 @@ atom-sync is an Atom package to sync files bidirectionally between remote host a
 
 > This package is currently in early development and has only been tested on Mac. Please kindly [try it out](http://atom.io/packages/atom-sync) and [provide feedback](https://github.com/dingjie/atom-sync/issues/new).
 
-![atom-sync](https://cloud.githubusercontent.com/assets/586262/8066587/feedcc68-0f1a-11e5-973e-e6b3668586fb.gif)
+![atom-sync](https://cloud.githubusercontent.com/assets/586262/8085519/2b63a7c4-0fc3-11e5-930a-685b09fe7af3.gif)
 
 ### Feature ###
 * Sync over ssh+rsync — still [secure](http://www.sakana.fr/blog/2008/05/07/securing-automated-rsync-over-ssh/), but much [faster](http://stackoverflow.com/questions/20244585/what-is-the-difference-between-scp-and-rsync).
