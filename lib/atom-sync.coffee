@@ -68,6 +68,9 @@ module.exports = AtomSync =
 
         roots = atom.project.rootDirectories
         selected = atom.workspace.getLeftPanels()[0].getItem().selectedPaths()[0]
+
+        return if not roots or not selected
+
         for dir in roots
             if (@getRelativePath dir.path, selected) isnt selected
                 return dir.path
@@ -89,16 +92,20 @@ module.exports = AtomSync =
         atom.workspace.open configFile
 
     getRelativePath: (base, fullpath) ->
+        return if not base or not fullpath
         fullpath.replace new RegExp('^'+base.replace(/([.?*+^$[\]\\/(){}|-])/g, "\\$1")), ''
 
     getConfigFilePath: ->
-        configFile = path.join @getCurrentRootDirectory(), '.sync-config.cson'
+        root = @getCurrentRootDirectory()
+        return if not root
+        configFile = path.join root, '.sync-config.cson'
 
     loadConfig: ->
         configFile = @getConfigFilePath()
+        return if not configFile
         if fs.isFileSync configFile
             return cson.load configFile
-        return null
+        return
 
     assertConfig: ->
         config = @loadConfig()
