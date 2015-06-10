@@ -3,7 +3,6 @@ ConsoleView = require './console-view'
 path = require 'path'
 cson = require 'CSON'
 fs = require 'fs-plus'
-Rsync = require 'rsync'
 
 # @TODO refactor and foolproof
 
@@ -162,25 +161,22 @@ module.exports = AtomSync =
 
     sync: (src, dst, config = {}) ->
         @show() if not config.behaviour.forgetConsole
-        @consoleView.log "<span class='info'>Syncing from #{src} to #{dst}</span> ..." if @consoleView isnt null
-        rsync = new Rsync()
-            .shell 'ssh'
-            .flags 'avzpu'
-            .source src
-            .destination dst
-            .output (data) => @consoleView.log data.toString('utf-8').trim()
+        @log "<span class='info'>Syncing from #{src} to #{dst}</span> ..."
 
-        rsync.delete() if config.option.deleteFiles?
-        rsync.exclude config.option.exclude if config.option.exclude?
-        rsync.execute (err, code, cmd) =>
-            if err
-                atom.notifications.addError "#{err.message}, please review your config file." if err
+        (require './provider/rsync')
+            src: src,
+            dst: dst,
+            config: config,
+            progress: (msg) => @consoleView.log msg
+            success: =>
+                @log "<span class='success'>Sync completed without error.</span>\n"
+                setTimeout @hide(), 1500 if config.behaviour.autoHideConsole
+            error: (msg, cmd) =>
+                atom.notifications.addError "#{err}, please review your config file."
                 console.error cmd
-            else
-                @consoleView.log "<span class='success'>Sync completed without error.</spane>\n" if @consoleView isnt null
-                if config.behaviour.autoHideConsole
-                    setTimeout (=> @hide()), 1500
 
+    log: (msg) ->
+        @consoleView.log msg if @consoleView?
 
     sampleConfig:
         remote:
