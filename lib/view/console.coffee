@@ -18,3 +18,7 @@ class ConsoleView extends View
         div.html @find('div.console').html() + "\n" + msg
         if div[0].scrollHeight > div.height()
             div.scrollTop div[0].scrollHeight - div.height()
+
+    empty: ->
+        @find 'div.console'
+            .html ''

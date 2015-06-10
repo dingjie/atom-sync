@@ -1,5 +1,6 @@
-ConsoleView = require './console-view'
+ConsoleView = require './view/console'
 {CompositeDisposable} = require 'atom'
+
 path = require 'path'
 cson = require 'CSON'
 fs = require 'fs-plus'
@@ -255,7 +256,10 @@ module.exports = AtomSync =
             success: =>
                 log 'success'
                 @log "<span class='success'>Sync completed without error.</span>\n"
-                setTimeout @hide(), 1500 if config.behaviour.autoHideConsole
+                if config.behaviour.autoHideConsole
+                    setTimeout =>
+                        @hide()
+                    , 1500
             error: (err, cmd) =>
                 log err
                 atom.notifications.addError "#{err}, please review your config file."
