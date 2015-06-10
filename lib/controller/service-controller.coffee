@@ -120,5 +120,6 @@ module.exports = ServiceController =
                         @console.hide()
                     , 1500
             error: (err, cmd) =>
-                atom.notifications.addError "#{err}, please review your config file."
-                console.error cmd
+                #atom.notifications.addError "#{err}, please review your config file."
+                #console.error cmd
+                @console.log "<span class='error'>#{err}, plese review your config file.</span>\n"
