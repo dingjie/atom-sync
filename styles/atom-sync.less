@@ -4,6 +4,16 @@
 // for a full listing of what's available.
 @import "ui-variables";
 
+@font-face {
+    font-family: 'Octicons';
+    src: url('atom://atom-sync/static/octicons.ttf');
+}
+
+@font-face {
+    font-family: 'ProggyCleanTT';
+    src: url('atom://atom-sync/static/ProggyClean.ttf');
+}
+
 .atom-sync {
     .header {
         background: @panel-heading-background-color;
@@ -12,11 +22,14 @@
         border-color: @panel-heading-border-color;
         padding: 10px;
 
-        .btn_close {
+        .btn_close, .btn_empty {
             float: right;
             padding: 5px 8px;
-            margin-top: -6px;
+            margin-left: 8px;
+            margin-top: -10px;
             cursor: pointer;
+            font-size: 16px;
+            font-family: "Octicons";
 
             &:hover {
                 color: @text-color-highlight;
@@ -25,16 +38,17 @@
     }
     .console {
         height: 200px;
-        white-space: pre;
+        white-space: pre-wrap;
         overflow-x: hidden;
         overflow-y: auto;
         padding: 5px;
         border: solid 1px;
         border-top: 0;
         border-color: @panel-heading-border-color;
-        font-size: 11px;
-        font-family: "Monaco";
+        font-size: 15px;
+        font-family: "ProggyCleanTT";
         line-height: 1.2;
+        -webkit-font-smoothing: none;
 
         .info {
             color: @text-color-info;
