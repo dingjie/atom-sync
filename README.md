@@ -52,6 +52,8 @@ option:
 * You have to `Sync Local -> Remote` manually after renaming and deleteing files.
 
 ### Roadmap ###
+* ConsoleView::clean() and btnClean
+* --list-only and confirm dialogue
 * Listen to events
   * Create folders
   * Rename files/folders
