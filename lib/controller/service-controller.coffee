@@ -22,7 +22,7 @@ module.exports = ServiceController =
 
     # TODO Should match exclude pattern in the same way as node-rsync does
     uploadEditingFile: (f) ->
-        config = @config.load()
+        config = @config.load(f)
         if config and config.behaviour.uploadOnSave
             log f
             @uploadFile(f)
@@ -30,7 +30,7 @@ module.exports = ServiceController =
             log 'give up'
 
     downloadOpeningFile: (f) ->
-        config = @config.load()
+        config = @config.load(f)
         if config and config.behaviour.syncDownOnOpen
             log f
             @downloadFile(f)
@@ -41,7 +41,7 @@ module.exports = ServiceController =
         if not fs.isFileSync f
             log 'not a file'
             return
-        config = @config.assert()
+        config = @config.assert(f)
         relativePath = @config.getRelativePath f
         if @config.isExcluded relativePath, config.option.exclude
             log 'excluded'
@@ -57,7 +57,7 @@ module.exports = ServiceController =
         if not fs.isFileSync f
             log 'not a file'
             return
-        config = @config.assert()
+        config = @config.assert(f)
         relativePath = @config.getRelativePath f
         if @config.isExcluded relativePath, config.option.exclude
             log 'excluded'

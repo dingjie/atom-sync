@@ -9,8 +9,8 @@ module.exports = ConfigHelper =
             fs.writeFileSync file, csonSample
         atom.workspace.open file
 
-    load: ->
-        file = @getFullPath()
+    load: (anchor = null) ->
+        file = @getFullPath(anchor)
         if not file
             return
 
@@ -19,8 +19,8 @@ module.exports = ConfigHelper =
 
         return
 
-    assert: ->
-        config = @load()
+    assert: (anchor = null) ->
+        config = @load(anchor)
         if not config
             throw new Error "You must create remote config first"
 
@@ -42,21 +42,28 @@ module.exports = ConfigHelper =
 
         return fullpath.replace new RegExp('^'+base.replace(/([.?*+^$[\]\\/(){}|-])/g, "\\$1")), ''
 
-    getFullPath: ->
-        root = @getCurrentProjectDirectory()
+    getFullPath: (anchor = null) ->
+        root = @getCurrentProjectDirectory(anchor)
         if not root
             return
 
         return path.join root, '.sync-config.cson'
 
-    getCurrentProjectDirectory: ->
+    getCurrentProjectDirectory: (anchor) ->
         if atom.project.rootDirectories.length < 1
             return
 
         roots = atom.project.rootDirectories
-        selected = atom.workspace.getLeftPanels()[0].getItem().selectedPaths()[0]
+        selected = (->
+            if anchor?
+                anchor
+            else if atom.workspace.getLeftPanels()[0]
+                atom.workspace.getLeftPanels()[0].getItem().selectedPaths()[0]
+            else
+                false
+        )()
 
-        if not roots or not selected
+        if not roots? or not selected?
             return
 
         for dir in roots
