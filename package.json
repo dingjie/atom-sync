@@ -12,7 +12,7 @@
   "repository": "https://github.com/dingjie/atom-sync",
   "license": "MIT",
   "engines": {
-    "atom": ">=0.174.0 <2.0.0"
+    "atom": ">=0.208.0 <2.0.0"
   },
   "dependencies": {
     "atom-space-pen-views": "^2.0.3",
