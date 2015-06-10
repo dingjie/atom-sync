@@ -53,6 +53,7 @@ option:
 
 ### Roadmap ###
 * ConsoleView::clean() and btnClean
+* --list-only and confirm dialogue
 * Listen to events
   * Create folders
   * Rename files/folders
