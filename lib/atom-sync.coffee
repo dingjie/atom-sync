@@ -52,6 +52,8 @@ module.exports = AtomSync =
     console: consoleHelper
     config: configHelper
 
+################################################################################
+
     # TODO Should match exclude pattern in the same way as node-rsync does
 
     uploadEditingFile: (f) ->
