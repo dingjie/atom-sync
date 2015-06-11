@@ -26,6 +26,7 @@ module.exports = ConfigHelper =
 
         return config
 
+    # TODO Should match exclude pattern in the same way as node-rsync does
     isExcluded: (str, exclude) ->
         for pattern in exclude
             if (str.indexOf pattern) isnt -1

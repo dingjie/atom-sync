@@ -15,99 +15,52 @@ module.exports = ServiceController =
     serialize: ->
         @console.serialize()
 
-    editConfigFile: ->
+    # Interfaces
+    toggleConsole: ->
+        if @console.isVisible() then @console.hide() else @console.show()
+
+    onCreate: ->
         @config.initialise()
 
-################################################################################
-
-    # TODO Should match exclude pattern in the same way as node-rsync does
-    uploadEditingFile: (f) ->
+    opSave: (f) ->
         config = @config.load(f)
-        if config and config.behaviour.uploadOnSave
-            log f
-            @uploadFile(f)
-        else
-            log 'give up'
+        @doSync(f, 'up') if config?.behaviour.uploadOnSave
 
-    downloadOpeningFile: (f) ->
+    onOpen: (f) ->
         config = @config.load(f)
-        if config and config.behaviour.syncDownOnOpen
-            log f
-            @downloadFile(f)
-        else
-            log 'give up'
+        @doSync(f, 'down') if config?.behaviour.syncDownOnOpen
 
-    downloadFile: (f) ->
-        if not fs.isFileSync f
-            log 'not a file'
-            return
-        config = @config.assert(f)
-        relativePath = @config.getRelativePath f
+    onSync: (obj, direction) ->
+        obj = path.normalize obj
+        config = @config.assert obj
+        relativePath = @config.getRelativePath obj
+
         if @config.isExcluded relativePath, config.option.exclude
-            log 'excluded'
             return
 
-        log f
+        switch direction
+            when 'up'
+                src = obj + (if fs.isDirectorySync obj then '/' else '')
+                dst = @genRemoteString config.remote.user, config.remote.host,
+                    if fs.isDirectorySync obj then path.join config.remote.path, relativePath else path.dirname (path.join config.remote.path, relativePath)
+            when 'down'
+                src = (@genRemoteString config.remote.user, config.remote.host, (path.join config.remote.path, relativePath)) + (if fs.isDirectorySync obj then '/' else '')
+                dst = if fs.isDirectorySync obj then path.normalize obj else (path.dirname obj) + '/'
+            else
+                return
 
-        src = "#{config.remote.user}@#{config.remote.host}:" + path.join config.remote.path, relativePath
-        dst = (path.dirname f) + '/'
-        @sync src, dst, config
+        @syncAdapter src, dst, config
 
-    uploadFile: (f) ->
-        if not fs.isFileSync f
-            log 'not a file'
-            return
-        config = @config.assert(f)
-        relativePath = @config.getRelativePath f
-        if @config.isExcluded relativePath, config.option.exclude
-            log 'excluded'
-            return
+    # Core
+    genRemoteString: (user, remoteAddr, remotePath) ->
+        result = "#{remoteAddr}:#{remotePath}"
+        result = "#{user}@#{result}" if user
 
-        log f
-
-        src = f
-        dst = "#{config.remote.user}@#{config.remote.host}:" + path.dirname path.join config.remote.path, relativePath
-        @sync src, dst, config
-
-    downloadDirectory: (d) ->
-        if not fs.isDirectorySync d
-            log 'not a directory'
-            return
-        config = @config.assert()
-        relativePath = @config.getRelativePath d
-        if @config.isExcluded relativePath, config.option.exclude
-            log 'excluded'
-            return
-
-        log d
-
-        src = "#{config.remote.user}@#{config.remote.host}:" + (path.join config.remote.path, relativePath) + '/'
-        dst = path.normalize d
-        @sync src, dst, config
-
-    uploadDirectory: (d) ->
-        if not fs.isDirectorySync d
-            log 'not a directory'
-            return
-        config = @config.assert()
-        relativePath = @config.getRelativePath d
-        if @config.isExcluded relativePath, config.option.exclude
-            log 'excluded'
-            return
-
-        log d
-
-        src = "#{d}/"
-        dst = "#{config.remote.user}@#{config.remote.host}:" + path.join config.remote.path, relativePath
-        @sync src, dst, config
-
-################################################################################
-
-    sync: (src, dst, config = {}) ->
+    sync: (src, dst, config = {}, provider = 'rsync-service') ->
         @console.show() if not config.behaviour.forgetConsole
         @console.log "<span class='info'>Syncing from #{src} to #{dst}</span> ..."
 
-        (require '../service/rsync-service')
+        (require '../service/' + provider)
             src: src,
             dst: dst,
             config: config,

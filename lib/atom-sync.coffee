@@ -9,29 +9,29 @@ module.exports = AtomSync =
     activate: (state) ->
         @subscriptions = new CompositeDisposable
         @subscriptions.add atom.commands.add '.tree-view.full-menu .header.list-item', 'atom-sync:configure': (e) =>
-            @controller.editConfigFile()
+            @controller.onCreate()
 
         @subscriptions.add atom.commands.add 'atom-workspace', 'atom-sync:download-directory': (e) =>
-            @controller.downloadDirectory atom.workspace.getLeftPanels()[0].getItem().selectedPaths()[0]
+            @controller.onSync atom.workspace.getLeftPanels()[0].getItem().selectedPaths()[0], 'down'
 
         @subscriptions.add atom.commands.add 'atom-workspace', 'atom-sync:upload-directory': (e) =>
-            @controller.uploadDirectory atom.workspace.getLeftPanels()[0].getItem().selectedPaths()[0]
+            @controller.onSync atom.workspace.getLeftPanels()[0].getItem().selectedPaths()[0], 'up'
 
         @subscriptions.add atom.commands.add 'atom-workspace', 'atom-sync:download-file': (e) =>
-            @controller.downloadFile atom.workspace.getLeftPanels()[0].getItem().selectedPaths()[0]
+            @controller.onSync atom.workspace.getLeftPanels()[0].getItem().selectedPaths()[0], 'down'
 
         @subscriptions.add atom.commands.add 'atom-workspace', 'atom-sync:upload-file': (e) =>
-            @controller.uploadFile atom.workspace.getLeftPanels()[0].getItem().selectedPaths()[0]
+            @controller.onSync atom.workspace.getLeftPanels()[0].getItem().selectedPaths()[0], 'up'
 
         @subscriptions.add atom.commands.add 'atom-workspace', 'atom-sync:toggle-log-panel': (e) =>
-            if @controller.console.isVisible() then @controller.console.hide() else @controller.console.show()
+            @controller.toggleConsole()
 
         @subscriptions.add atom.workspace.observeTextEditors (editor) =>
             editor.onDidSave (e) =>
-                @controller.uploadEditingFile e.path
+                @controller.onSave e.path
 
         @subscriptions.add atom.workspace.onDidOpen (e) =>
-            @controller.downloadOpeningFile e.uri
+            @controller.onOpen e.uri
 
     deactivate: ->
         @controller.destory()

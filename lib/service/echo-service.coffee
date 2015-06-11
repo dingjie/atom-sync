@@ -1,3 +1,5 @@
+config = require '../helper/config-helper'
+
 module.exports = (opt = {}) ->
     src = opt.src
     dst = opt.dst
