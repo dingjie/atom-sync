@@ -4,7 +4,7 @@
         'label': 'Sync'
         'submenu': [
             {
-                'label': 'Edit Remote Config'
+                'label': 'Edit Sync Config'
                 'command': 'atom-sync:configure'
             }
             {

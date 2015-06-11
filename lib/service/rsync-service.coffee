@@ -2,7 +2,6 @@ Rsync = require 'rsync'
 cson = require 'CSON'
 
 yellowpage =
-    0: 'Success'
     1: 'Syntax or usage error'
     2: 'Protocol incompatibility'
     3: 'Errors selecting input/output files, dirs'
@@ -22,6 +21,7 @@ yellowpage =
     25: 'The --max-delete limit stopped deletions'
     30: 'Timeout in data send/receive'
     35: 'Timeout waiting for daemon connection'
+    255: 'SSH connection failed'
 
 module.exports = (opt = {}) ->
     src = opt.src
@@ -41,7 +41,7 @@ module.exports = (opt = {}) ->
             progress? data.toString('utf-8').trim()
     console.log error
     rsync.delete() if config.option?.deleteFiles?
-    rsync.exclude config.option.exclude if config?.option?.exclude
+    rsync.exclude config.option.exclude if config.option?.exclude?
     rsync.execute (err, code, cmd) =>
         if err
             error? (yellowpage[code] ? err.message), cmd

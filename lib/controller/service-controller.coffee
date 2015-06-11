@@ -22,20 +22,26 @@ module.exports = ServiceController =
     onCreate: ->
         @config.initialise()
 
-    opSave: (f) ->
-        config = @config.load(f)
-        @doSync(f, 'up') if config?.behaviour.uploadOnSave
+    onSave: (obj) ->
+        config = @config.load obj
+        (@onSync obj, 'up') if config.behaviour?.uploadOnSave?
 
-    onOpen: (f) ->
-        config = @config.load(f)
-        @doSync(f, 'down') if config?.behaviour.syncDownOnOpen
+    onOpen: (obj) ->
+        config = @config.load obj
+        (@onSync obj, 'down') if config.behaviour?.syncDownOnOpen?
 
     onSync: (obj, direction) ->
         obj = path.normalize obj
-        config = @config.assert obj
+        try
+            config = @config.assert obj
+        catch err
+            @console.show()
+            @console.log "<span class='error'>#{err}</span>\n"
+            return
+
         relativePath = @config.getRelativePath obj
 
-        if @config.isExcluded relativePath, config.option.exclude
+        if @config.isExcluded relativePath, config.option?.exclude?
             return
 
         switch direction
@@ -49,7 +55,7 @@ module.exports = ServiceController =
             else
                 return
 
-        @syncAdapter src, dst, config
+        @sync src, dst, config
 
     # Core
     genRemoteString: (user, remoteAddr, remotePath) ->
