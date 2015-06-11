@@ -39,9 +39,9 @@ module.exports = (opt = {}) ->
         .destination dst
         .output (data) ->
             progress? data.toString('utf-8').trim()
-    console.log error
-    rsync.delete() if config.option?.deleteFiles?
-    rsync.exclude config.option.exclude if config.option?.exclude?
+
+    rsync.delete() if config.option?.deleteFiles
+    rsync.exclude config.option.exclude if config.option?.exclude
     rsync.execute (err, code, cmd) =>
         if err
             error? (yellowpage[code] ? err.message), cmd

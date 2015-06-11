@@ -64,7 +64,7 @@ module.exports = ConfigHelper =
                 false
         )()
 
-        if not roots? or not selected?
+        if not (roots and selected)
             return
 
         for dir in roots
@@ -83,7 +83,7 @@ module.exports = ConfigHelper =
             forgetConsole: false
             autoHideConsole: true
         option:
-            deleteFiles: true
+            deleteFiles: false
             exclude: [
                 '.sync-config.cson'
                 '.git'

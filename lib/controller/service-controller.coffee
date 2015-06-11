@@ -24,11 +24,11 @@ module.exports = ServiceController =
 
     onSave: (obj) ->
         config = @config.load obj
-        (@onSync obj, 'up') if config.behaviour?.uploadOnSave?
+        @onSync obj, 'up' if config?.behaviour?.uploadOnSave
 
     onOpen: (obj) ->
         config = @config.load obj
-        (@onSync obj, 'down') if config.behaviour?.syncDownOnOpen?
+        @onSync obj, 'down' if config?.behaviour?.syncDownOnOpen
 
     onSync: (obj, direction) ->
         obj = path.normalize obj
@@ -41,7 +41,7 @@ module.exports = ServiceController =
 
         relativePath = @config.getRelativePath obj
 
-        if @config.isExcluded relativePath, config.option?.exclude?
+        if @config.isExcluded relativePath, config.option?.exclude
             return
 
         switch direction
@@ -74,10 +74,8 @@ module.exports = ServiceController =
                 @console.log msg
             success: =>
                 @console.log "<span class='success'>Sync completed without error.</span>\n"
-                if config.behaviour.autoHideConsole
-                    setTimeout =>
-                        @console.hide()
-                    , 1500
+                if config.behaviour?.autoHideConsole
+                    setTimeout (=> @console.hide()), 1500
             error: (err, cmd) =>
                 #atom.notifications.addError "#{err}, please review your config file."
                 #console.error cmd
