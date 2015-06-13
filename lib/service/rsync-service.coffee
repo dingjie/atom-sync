@@ -1,5 +1,4 @@
 Rsync = require 'rsync'
-cson = require 'CSON'
 
 yellowpage =
     1: 'Syntax or usage error'

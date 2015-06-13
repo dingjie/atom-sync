@@ -1,11 +1,12 @@
 fs = require 'fs-plus'
-cson = require 'CSON'
+cson = require 'season'
+path = require 'path'
 
 module.exports = ConfigHelper =
     initialise: ->
         file =  @getFullPath()
         if not fs.isFileSync file
-            csonSample = cson.createCSONString @sample
+            csonSample = cson.stringify @sample
             fs.writeFileSync file, csonSample
         atom.workspace.open file
 
@@ -15,7 +16,7 @@ module.exports = ConfigHelper =
             return
 
         if fs.isFileSync file
-            return cson.load file
+            return cson.readFileSync file
 
         return
 
