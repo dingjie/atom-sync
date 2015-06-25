@@ -83,6 +83,7 @@ module.exports = ConfigHelper =
             syncDownOnOpen: true
             forgetConsole: false
             autoHideConsole: true
+            alwaysSyncAll: false
         option:
             deleteFiles: false
             exclude: [

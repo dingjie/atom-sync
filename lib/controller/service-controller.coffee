@@ -46,12 +46,20 @@ module.exports = ServiceController =
 
         switch direction
             when 'up'
-                src = obj + (if fs.isDirectorySync obj then '/' else '')
-                dst = @genRemoteString config.remote.user, config.remote.host,
-                    if fs.isDirectorySync obj then path.join config.remote.path, relativePath else path.dirname (path.join config.remote.path, relativePath)
+                if config.behaviour?.alwaysSyncAll is true
+                    src = @config.getCurrentProjectDirectory() + '/'
+                    dst = @genRemoteString config.remote.user, config.remote.host, config.remote.path
+                else
+                    src = obj + (if fs.isDirectorySync obj then '/' else '')
+                    dst = @genRemoteString config.remote.user, config.remote.host,
+                        if fs.isDirectorySync obj then path.join config.remote.path, relativePath else path.dirname (path.join config.remote.path, relativePath)
             when 'down'
-                src = (@genRemoteString config.remote.user, config.remote.host, (path.join config.remote.path, relativePath)) + (if fs.isDirectorySync obj then '/' else '')
-                dst = if fs.isDirectorySync obj then path.normalize obj else (path.dirname obj) + '/'
+                if config.behaviour?.alwaysSyncAll is true
+                    src = (@genRemoteString config.remote.user, config.remote.host, config.remote.path) + '/'
+                    dst = @config.getCurrentProjectDirectory()
+                else
+                    src = (@genRemoteString config.remote.user, config.remote.host, (path.join config.remote.path, relativePath)) + (if fs.isDirectorySync obj then '/' else '')
+                    dst = if fs.isDirectorySync obj then path.normalize obj else (path.dirname obj) + '/'
             else
                 return
 
