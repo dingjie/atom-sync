@@ -39,7 +39,8 @@ behaviour:
     syncDownOnOpen: true    # Download every time you open a file
     forgetConsole: false    # Never show console panel even while syncing
     autoHideConsole: true   # Hide console automatically after 1.5s
-    alwaysSyncAll: false    # Sync all files and folders under the project instead of syncing single file or folder
+    alwaysSyncAll: false    # Sync all files and folders under the project \
+                            # instead of syncing single file or folder
 option:
     deleteFiles: true       # Delete files during syncing
     exclude: [              # Excluding patterns
