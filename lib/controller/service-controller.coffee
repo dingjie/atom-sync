@@ -55,8 +55,14 @@ module.exports = ServiceController =
                         if fs.isDirectorySync obj then path.join config.remote.path, relativePath else path.dirname (path.join config.remote.path, relativePath)
             when 'down'
                 if config.behaviour?.alwaysSyncAll is true
+                    # A hack to prevent a newly created file being deleted
+                    src = (@genRemoteString config.remote.user, config.remote.host, (path.join config.remote.path, relativePath)) + (if fs.isDirectorySync obj then '/' else '')
+                    dst = if fs.isDirectorySync obj then path.normalize obj else (path.dirname obj) + '/'
+                    @sync src, dst, config
+
                     src = (@genRemoteString config.remote.user, config.remote.host, config.remote.path) + path.sep
                     dst = @config.getCurrentProjectDirectory()
+                    config.option.exclude.push relativePath
                 else
                     src = (@genRemoteString config.remote.user, config.remote.host, (path.join config.remote.path, relativePath)) + (if fs.isDirectorySync obj then '/' else '')
                     dst = if fs.isDirectorySync obj then path.normalize obj else (path.dirname obj) + '/'
