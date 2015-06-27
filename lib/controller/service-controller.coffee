@@ -47,15 +47,15 @@ module.exports = ServiceController =
         switch direction
             when 'up'
                 if config.behaviour?.alwaysSyncAll is true
-                    src = @config.getCurrentProjectDirectory() + '/'
+                    src = @config.getCurrentProjectDirectory() + path.sep
                     dst = @genRemoteString config.remote.user, config.remote.host, config.remote.path
                 else
-                    src = obj + (if fs.isDirectorySync obj then '/' else '')
+                    src = obj + (if fs.isDirectorySync obj then path.sep else '')
                     dst = @genRemoteString config.remote.user, config.remote.host,
                         if fs.isDirectorySync obj then path.join config.remote.path, relativePath else path.dirname (path.join config.remote.path, relativePath)
             when 'down'
                 if config.behaviour?.alwaysSyncAll is true
-                    src = (@genRemoteString config.remote.user, config.remote.host, config.remote.path) + '/'
+                    src = (@genRemoteString config.remote.user, config.remote.host, config.remote.path) + path.sep
                     dst = @config.getCurrentProjectDirectory()
                 else
                     src = (@genRemoteString config.remote.user, config.remote.host, (path.join config.remote.path, relativePath)) + (if fs.isDirectorySync obj then '/' else '')
