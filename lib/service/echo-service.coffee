@@ -8,7 +8,7 @@ module.exports = (opt = {}) ->
     error = opt.error
     progress = opt.progress
 
-    progress? JSON.stringify opt, null, 4
+    # progress? JSON.stringify opt, null, 4
 
     if opt.showError and error
         error "Error!"

@@ -1,78 +1,44 @@
 fs = require 'fs-plus'
 cson = require 'season'
 path = require 'path'
+_ = require 'underscore'
 
 module.exports = ConfigHelper =
-    initialise: ->
-        file =  @getFullPath()
-        if not fs.isFileSync file
+    configFileName: '.sync-config.cson'
+
+    initialise: (f) ->
+        config = @getConfigPath f
+        if not fs.isFileSync config
             csonSample = cson.stringify @sample
-            fs.writeFileSync file, csonSample
-        atom.workspace.open file
+            fs.writeFileSync config, csonSample
+        atom.workspace.open config
 
-    load: (anchor = null) ->
-        file = @getFullPath(anchor)
-        if not file
-            return
+    load: (f) ->
+        config = @getConfigPath f
+        return if not config or not fs.isFileSync config
+        cson.readFileSync config
 
-        if fs.isFileSync file
-            return cson.readFileSync file
+    assert: (f) ->
+        config = @load f
+        if not config then throw new Error "You must create remote config first"
+        config
 
-        return
-
-    assert: (anchor = null) ->
-        config = @load(anchor)
-        if not config
-            throw new Error "You must create remote config first"
-
-        return config
-
-    # TODO Should match exclude pattern in the same way as node-rsync does
     isExcluded: (str, exclude) ->
         for pattern in exclude
-            if (str.indexOf pattern) isnt -1
-                return true
+            return true if (str.indexOf pattern) isnt -1
         return false
 
-    getRelativePath: (fullpath) ->
-        base = @getCurrentProjectDirectory()
-        return @getRelativePathByBase base, fullpath
+    getRelativePath: (f) ->
+         path.relative (@getRootPath f), f
 
-    getRelativePathByBase: (base, fullpath) ->
-        if not base or not fullpath
-            return
+    getRootPath: (f) ->
+        _.find atom.project.getPaths(), (x) -> (f.indexOf x) isnt -1
 
-        return fullpath.replace new RegExp('^'+base.replace(/([.?*+^$[\]\\/(){}|-])/g, "\\$1")), ''
+    getConfigPath: (f) ->
+        base = @getRootPath f
+        return if not base
+        path.join base, @configFileName
 
-    getFullPath: (anchor = null) ->
-        root = @getCurrentProjectDirectory(anchor)
-        if not root
-            return
-
-        return path.join root, '.sync-config.cson'
-
-    getCurrentProjectDirectory: (anchor) ->
-        if atom.project.rootDirectories.length < 1
-            return
-
-        roots = atom.project.rootDirectories
-        selected = (->
-            if anchor?
-                anchor
-            else if atom.workspace.getLeftPanels()[0]
-                atom.workspace.getLeftPanels()[0].getItem().selectedPaths()[0]
-            else
-                false
-        )()
-
-        if not (roots and selected)
-            return
-
-        for dir in roots
-            if (@getRelativePathByBase dir.path, selected) isnt selected
-                return dir.path
-
-    # TODO Should be store in a static file for comments
     sample:
         remote:
             host: "HOSTNAME",

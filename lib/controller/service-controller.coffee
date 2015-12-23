@@ -19,8 +19,8 @@ module.exports = ServiceController =
     toggleConsole: ->
         if @console.isVisible() then @console.hide() else @console.show()
 
-    onCreate: ->
-        @config.initialise()
+    onCreate: (obj) ->
+        @config.initialise obj
 
     onSave: (obj) ->
         config = @config.load obj
@@ -32,6 +32,7 @@ module.exports = ServiceController =
 
     onSync: (obj, direction) ->
         obj = path.normalize obj
+
         try
             config = @config.assert obj
         catch err
@@ -41,13 +42,12 @@ module.exports = ServiceController =
 
         relativePath = @config.getRelativePath obj
 
-        if @config.isExcluded relativePath, config.option?.exclude
-            return
+        return if @config.isExcluded relativePath, config.option?.exclude
 
         switch direction
             when 'up'
                 if config.behaviour?.alwaysSyncAll is true
-                    src = @config.getCurrentProjectDirectory() + path.sep
+                    src = (@config.getRootPath obj) + path.sep
                     dst = @genRemoteString config.remote.user, config.remote.host, config.remote.path
                 else
                     src = obj + (if fs.isDirectorySync obj then path.sep else '')
@@ -61,7 +61,7 @@ module.exports = ServiceController =
                     @sync src, dst, config
 
                     src = (@genRemoteString config.remote.user, config.remote.host, config.remote.path) + path.sep
-                    dst = @config.getCurrentProjectDirectory()
+                    dst = (@config.getRootPath obj) + path.sep
                     config.option.exclude.push relativePath
                 else
                     src = (@genRemoteString config.remote.user, config.remote.host, (path.join config.remote.path, relativePath)) + (if fs.isDirectorySync obj then '/' else '')
@@ -89,7 +89,10 @@ module.exports = ServiceController =
             success: =>
                 @console.log "<span class='success'>Sync completed without error.</span>\n"
                 if config.behaviour?.autoHideConsole
-                    setTimeout (=> @console.hide()), 1500
+                    clearTimeout @_timer
+                    @_timer = setTimeout (=>
+                        @console.hide()
+                    ), 1500
             error: (err, cmd) =>
                 #atom.notifications.addError "#{err}, please review your config file."
                 #console.error cmd

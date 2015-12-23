@@ -26,7 +26,7 @@ module.exports = (opt = {}) ->
     src = opt.src
     dst = opt.dst
     config = opt.config
-    flags = config?.flags ? 'avzpu'
+    flags = config?.flags ? 'avzpur'
     success = opt.success
     error = opt.error
     progress = opt.progress
