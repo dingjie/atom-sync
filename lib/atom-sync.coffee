@@ -10,14 +10,18 @@ module.exports = AtomSync =
 
     activate: (state) ->
         @subscriptions = new CompositeDisposable
+
+        # Bind commands
+
+        @subscriptions.add atom.commands.add 'atom-workspace', 'atom-sync:debug': (e) =>
+            @controller.debug @getProjectPath atom.workspace.getActivePaneItem().buffer.file.path
+
         @subscriptions.add atom.commands.add '.tree-view.full-menu .header.list-item', 'atom-sync:configure': (e) =>
             @controller.onCreate @getSelectedPath e.target
 
-        @subscriptions.add atom.commands.add 'atom-workspace', 'atom-sync:debug': (e) =>
-            @controller.debug @getSelectedPath e.target
-
         @subscriptions.add atom.commands.add 'atom-workspace', 'atom-sync:upload-project': (e) =>
-            @controller.onSync (atom.project.getPaths()[0]), 'up'
+            projectFolder = @getProjectPath atom.workspace.getActivePaneItem().buffer.file.path
+            @controller.onSync projectFolder, 'up' if projectFolder
 
         @subscriptions.add atom.commands.add 'atom-workspace', 'atom-sync:download-directory': (e) =>
             @controller.onSync (@getSelectedPath e.target, yes), 'down'
@@ -33,6 +37,8 @@ module.exports = AtomSync =
 
         @subscriptions.add atom.commands.add 'atom-workspace', 'atom-sync:toggle-log-panel': (e) =>
             @controller.toggleConsole()
+
+        # Observe events
 
         @subscriptions.add atom.workspace.observeTextEditors (editor) =>
             editor.onDidSave (e) =>
@@ -50,6 +56,9 @@ module.exports = AtomSync =
                 path.dirname(atom.workspace.getActivePaneItem().buffer.file.path)
             else
                 atom.workspace.getActivePaneItem().buffer.file.path
+
+    getProjectPath: (f) ->
+        _.find atom.project.getPaths(), (x) -> (f.indexOf x) isnt -1
 
     deactivate: ->
         @controller.destory()
