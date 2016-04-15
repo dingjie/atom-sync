@@ -27,3 +27,15 @@ module.exports = ConsoleHelper =
 
     serialize: ->
         @consoleView?.serialize()
+
+    error: (msg) ->
+        @log "<span class='error'>#{msg}</span>"
+
+    info: (msg) ->
+        @log "<span class='info'>#{msg}</span>"
+
+    warn: (msg) ->
+        @log "<span class='warning'>#{msg}</span>"
+
+    success: (msg) ->
+        @log "<span class='success'>#{msg}</span>"
