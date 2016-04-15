@@ -10,7 +10,9 @@
 # 'atom-workspace':
 #   'ctrl-alt-o': 'atom-sync:toggle'
 
-'atom-workspace':
-    'ctrl-alt-l': 'atom-sync:toggle-log-panel'
-    'ctrl-shift-a': 'atom-sync:upload-project'
+'.platform-darwin atom-workspace':
+    'cmd-alt-l': 'atom-sync:toggle-log-panel'
     'cmd-alt-,': 'atom-sync:debug'
+
+'.platform-win32 atom-workspace, .platform-linux atom-workspace':
+    'ctrl-alt-l': 'atom-sync:toggle-log-panel'
