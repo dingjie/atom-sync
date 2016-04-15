@@ -13,3 +13,4 @@
 'atom-workspace':
     'ctrl-alt-l': 'atom-sync:toggle-log-panel'
     'ctrl-shift-a': 'atom-sync:upload-project'
+    'cmd-alt-,': 'atom-sync:debug'

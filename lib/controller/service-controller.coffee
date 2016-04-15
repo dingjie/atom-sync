@@ -9,6 +9,9 @@ module.exports = ServiceController =
     console: consoleHelper
     config: configHelper
 
+    debug: ->
+        log arguments
+
     destory: ->
         @console.destory()
 

@@ -5,15 +5,15 @@ controller = require './controller/service-controller'
 
 module.exports = AtomSync =
     subscriptions: null
-    controller: controller;
+    controller: controller
 
     activate: (state) ->
         @subscriptions = new CompositeDisposable
         @subscriptions.add atom.commands.add '.tree-view.full-menu .header.list-item', 'atom-sync:configure': (e) =>
             @controller.onCreate @getSelectedPath e.target
 
-        @subscriptions.add atom.commands.add 'atom-workspace', 'atom-sync:test': (e) =>
-            @controller.test "test", @getSelectedPath e.target
+        @subscriptions.add atom.commands.add 'atom-workspace', 'atom-sync:debug': (e) =>
+            @controller.debug @getSelectedPath e.target
 
         @subscriptions.add atom.commands.add 'atom-workspace', 'atom-sync:upload-project': (e) =>
             @controller.onSync (atom.project.getPaths()[0]), 'up'
