@@ -74,7 +74,7 @@ module.exports = ServiceController =
                 return
 
         @sync src, dst, config, 'rsync-service', =>
-            if direction is 'up' and config.triggers
+            if direction is 'up' and config.trigger
                 @fireTriggers obj, config
 
 
@@ -84,7 +84,7 @@ module.exports = ServiceController =
         result = "#{user}@#{result}" if user
 
     sync: (src, dst, config = {}, provider, complete) ->
-        delay = config.hideConsoleDelay or 1500
+        delay = config.option?.autoHideDelay or 1500
 
         @console.show() if not config.behaviour.forgetConsole
         @console.log "<span class='info'>Syncing from #{src} to #{dst}</span> ..."
@@ -108,13 +108,12 @@ module.exports = ServiceController =
 
     fireTriggers: (path, config) ->
         rpath = @config.getRelativePath path
-        tasks = _.flattenDeep _.filter config.triggers, (o, i) => (i is '*') or rpath.startsWith i
+        tasks = _.flattenDeep _.filter config.trigger, (o, i) => (i is '*') or rpath.startsWith i
         if tasks?.length > 0
             tasks.unshift "cd #{config.remote.path}"
             cmd = (_.map tasks, (x) -> x.replace ';', '\\;').join ';'
             ssh = new (require 'node-sshclient').SSH
                 hostname: config.remote.host
                 user: config.remote.user
-            console.log cmd
             ssh.command cmd, '', (out) =>
                 @console.log "<span class='info'>Triggered</span>\n#{out.stdout}<span class='success'>Done!\n</span>"

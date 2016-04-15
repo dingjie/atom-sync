@@ -26,11 +26,11 @@ module.exports = (opt = {}) ->
     src = opt.src
     dst = opt.dst
     config = opt.config
-    flags = config?.flags ? 'avzpur'
+    flags = config.option?.flags ? 'avzpur'
     success = opt.success
     error = opt.error
     progress = opt.progress
-    shell = config?.shell ? 'ssh'
+    shell = config.option?.shell ? 'ssh'
 
     rsync = new Rsync()
         .shell shell
