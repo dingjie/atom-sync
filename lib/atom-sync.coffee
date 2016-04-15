@@ -1,3 +1,4 @@
+path = require 'path'
 {CompositeDisposable} = require 'atom'
 {$} = require 'atom-space-pen-views'
 
@@ -19,10 +20,10 @@ module.exports = AtomSync =
             @controller.onSync (atom.project.getPaths()[0]), 'up'
 
         @subscriptions.add atom.commands.add 'atom-workspace', 'atom-sync:download-directory': (e) =>
-            @controller.onSync (@getSelectedPath e.target), 'down'
+            @controller.onSync (@getSelectedPath e.target, yes), 'down'
 
         @subscriptions.add atom.commands.add 'atom-workspace', 'atom-sync:upload-directory': (e) =>
-            @controller.onSync (@getSelectedPath e.target), 'up'
+            @controller.onSync (@getSelectedPath e.target, yes), 'up'
 
         @subscriptions.add atom.commands.add 'atom-workspace', 'atom-sync:download-file': (e) =>
             @controller.onSync (@getSelectedPath e.target), 'down'
@@ -40,8 +41,15 @@ module.exports = AtomSync =
         @subscriptions.add atom.workspace.onDidOpen (e) =>
             @controller.onOpen e.uri
 
-    getSelectedPath: (target) ->
-        (if ($ target).is 'span' then $ target else ($ target).find 'span')?.attr 'data-path'
+    getSelectedPath: (target, directory = no) ->
+        selection = (if ($ target).is 'span' then $ target else ($ target).find 'span')?.attr 'data-path'
+        if selection?
+            selection
+        else
+            if directory
+                path.dirname(atom.workspace.getActivePaneItem().buffer.file.path)
+            else
+                atom.workspace.getActivePaneItem().buffer.file.path
 
     deactivate: ->
         @controller.destory()
