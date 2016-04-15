@@ -33,7 +33,7 @@ module.exports = (opt = {}) ->
 
     rsync = new Rsync()
         .shell 'ssh'
-        .flags 'avzpu'
+        .flags flags
         .source src
         .destination dst
         .output (data) ->
