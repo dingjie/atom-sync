@@ -1,7 +1,7 @@
 fs = require 'fs-plus'
 cson = require 'season'
 path = require 'path'
-_ = require 'underscore'
+_ = require 'lodash'
 
 module.exports = ConfigHelper =
     configFileName: '.sync-config.cson'
