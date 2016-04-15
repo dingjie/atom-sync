@@ -15,6 +15,9 @@ module.exports = AtomSync =
         @subscriptions.add atom.commands.add 'atom-workspace', 'atom-sync:test': (e) =>
             @controller.test "test", @getSelectedPath e.target
 
+        @subscriptions.add atom.commands.add 'atom-workspace', 'atom-sync:upload-project': (e) =>
+            @controller.onSync (atom.project.getPaths()[0]), 'up'
+
         @subscriptions.add atom.commands.add 'atom-workspace', 'atom-sync:download-directory': (e) =>
             @controller.onSync (@getSelectedPath e.target), 'down'
 
