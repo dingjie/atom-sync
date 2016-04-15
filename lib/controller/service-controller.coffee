@@ -1,3 +1,4 @@
+_ = require 'lodash'
 path = require 'path'
 fs = require 'fs-plus'
 log = require '../helper/logger-helper'
@@ -72,14 +73,19 @@ module.exports = ServiceController =
             else
                 return
 
-        @sync src, dst, config
+        @sync src, dst, config, 'rsync-service', =>
+            if direction is 'up' and config.triggers
+                @fireTriggers obj, config
+
 
     # Core
     genRemoteString: (user, remoteAddr, remotePath) ->
         result = "#{remoteAddr}:#{remotePath}"
         result = "#{user}@#{result}" if user
 
-    sync: (src, dst, config = {}, provider = 'rsync-service') ->
+    sync: (src, dst, config = {}, provider, complete) ->
+        delay = config.hideConsoleDelay or 1500
+
         @console.show() if not config.behaviour.forgetConsole
         @console.log "<span class='info'>Syncing from #{src} to #{dst}</span> ..."
 
@@ -91,12 +97,24 @@ module.exports = ServiceController =
                 @console.log msg
             success: =>
                 @console.log "<span class='success'>Sync completed without error.</span>\n"
+                complete() if complete
                 if config.behaviour?.autoHideConsole
                     clearTimeout @_timer
                     @_timer = setTimeout (=>
                         @console.hide()
-                    ), 1500
+                    ), delay
             error: (err, cmd) =>
-                #atom.notifications.addError "#{err}, please review your config file."
-                #console.error cmd
                 @console.log "<span class='error'>#{err}, please review your config file.</span>\n"
+
+    fireTriggers: (path, config) ->
+        rpath = @config.getRelativePath path
+        tasks = _.flattenDeep _.filter config.triggers, (o, i) => (i is '*') or rpath.startsWith i
+        if tasks?.length > 0
+            tasks.unshift "cd #{config.remote.path}"
+            cmd = (_.map tasks, (x) -> x.replace ';', '\\;').join ';'
+            ssh = new (require 'node-sshclient').SSH
+                hostname: config.remote.host
+                user: config.remote.user
+            console.log cmd
+            ssh.command cmd, '', (out) =>
+                @console.log "<span class='info'>Triggered</span>\n#{out.stdout}<span class='success'>Done!\n</span>"

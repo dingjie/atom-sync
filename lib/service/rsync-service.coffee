@@ -30,9 +30,10 @@ module.exports = (opt = {}) ->
     success = opt.success
     error = opt.error
     progress = opt.progress
+    shell = config?.shell ? 'ssh'
 
     rsync = new Rsync()
-        .shell 'ssh'
+        .shell shell
         .flags flags
         .source src
         .destination dst
@@ -43,6 +44,7 @@ module.exports = (opt = {}) ->
     rsync.exclude config.option.exclude if config.option?.exclude
     rsync.execute (err, code, cmd) =>
         if err
+            console.log err, code, cmd
             error? (yellowpage[code] ? err.message), cmd
         else
             success?()
