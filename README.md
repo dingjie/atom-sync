@@ -75,7 +75,7 @@ trigger:                    # Triggers fire after uploading file successfully
 ```
 
 ### Keybindings ###
-* `ctrl`+`alt`+`l` Toggle log window
+* `ctrl`+`alt`+`l` (Windows/Linux) `cmd`+`alt`+`l` (Mac) Toggle log window
 
 ### Known Problems ###
 * You have to `Sync Local -> Remote` manually after renaming and deleting files.
