@@ -74,6 +74,28 @@ trigger:                    # Triggers fire after uploading file successfully
     ]
 ```
 
+### Introduction to Trigger ###
+#### Config ####
+```
+trigger:
+    "*": [
+        "echo \'<span class=warning>Every time you\\'ll see me</span>\'"
+    ]
+    "coffee": [
+        "echo Compile coffeescript to js ..."
+        "mkdir -p js"
+        "coffee -b --output js/ --compile coffee/"
+        "ls js/|xargs -I@ echo \\t@"
+    ]
+    "sass/style.sass": [
+        "echo Compile sass to css ..."
+        "mkdir -p css"
+        "sass --update sass:css"
+    ]
+```
+#### Result ####
+![trigger](https://cloud.githubusercontent.com/assets/586262/14584004/a2cf2872-0466-11e6-9908-5f035a8b4e46.gif)
+
 ### Keybindings ###
 * `ctrl`+`alt`+`l` (Windows/Linux) `cmd`+`alt`+`l` (Mac) Toggle log window
 
