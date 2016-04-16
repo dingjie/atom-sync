@@ -11,6 +11,7 @@ atom-sync is an Atom package to sync files bidirectionally between remote host a
 ### Feature ###
 * Sync over ssh+rsync — still [secure](http://www.sakana.fr/blog/2008/05/07/securing-automated-rsync-over-ssh/), but much [faster](http://stackoverflow.com/questions/20244585/what-is-the-difference-between-scp-and-rsync).
 * [Multi-Folder Projects](http://blog.atom.io/2015/04/15/multi-folder-projects.html) with different sync config files supported
+* Triggers conditionally run commands after successful uploading
 
 ### Prerequisite ###
 * Ensure you have `ssh` and `rsync` installed.
@@ -50,20 +51,34 @@ option:
         'tmp'
         'vendor'
     ]
+trigger:                    # Triggers fire after uploading file successfully
+                            # which STARTS with following patterns
+    "*": [                  # Wildcard trigger for any file uploaded
+        "uptime"
+    ]
+    "resources/scripts/coffee": [   # Any file under %PROJECT_ROOT%/resources/scripts/coffee
+                                    # being uploaded will fire this trigger
+
+        "echo Compile coffeescript to js ..."
+        "coffee -b --output public/js/ --compile resources/scripts/coffee/"
+
+        # Notice: You can also pipe commands but don't forget to escape special characters
+        "ls public/js/|xargs -I@ echo \\t=>@"
+    ]
+    "resources/scripts/sass": [
+        "echo Compile sass to css ..."
+        "sass --update resources/scripts/sass:public/css"
+    ]
 ```
 
 ### Keybindings ###
 * `ctrl`+`alt`+`l` Toggle log window
 
 ### Known Problems ###
-* You have to `Sync Local -> Remote` manually after renaming and deleteing files.
+* You have to `Sync Local -> Remote` manually after renaming and deleting files.
 
 ### Roadmap ###
-* Refactoring
-* ConsoleView::clean() and btnClean
-* --list-only and confirm dialogue
 * Listen to events
   * Create folders
   * Rename files/folders
   * What about deleting?
-* SSH parameters in config file e.g. public key, port et al.
