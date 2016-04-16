@@ -13,8 +13,8 @@ module.exports = AtomSync =
 
         # Bind commands
 
-        @subscriptions.add atom.commands.add 'atom-workspace', 'atom-sync:debug': (e) =>
-            @controller.debug @getProjectPath atom.workspace.getActivePaneItem().buffer.file.path
+        # @subscriptions.add atom.commands.add 'atom-workspace', 'atom-sync:debug': (e) =>
+        #     @controller.debug @getProjectPath atom.workspace.getActivePaneItem().buffer.file.path
 
         @subscriptions.add atom.commands.add '.tree-view.full-menu .header.list-item', 'atom-sync:configure': (e) =>
             @controller.onCreate @getSelectedPath e.target

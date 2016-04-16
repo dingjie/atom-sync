@@ -12,7 +12,6 @@
 
 '.platform-darwin atom-workspace':
     'cmd-alt-l': 'atom-sync:toggle-log-panel'
-    'cmd-alt-,': 'atom-sync:debug'
 
 '.platform-win32 atom-workspace, .platform-linux atom-workspace':
     'ctrl-alt-l': 'atom-sync:toggle-log-panel'

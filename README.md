@@ -26,7 +26,7 @@ atom-sync is an Atom package to sync files bidirectionally between remote host a
 ### Notice ###
 * Password based login is not supported—at least yet, you have to [assign your key file](https://www.linode.com/docs/security/use-public-key-authentication-with-ssh) and better host name in .ssh/config in advanced. Try to [Simplify Your Life With an SSH Config File](http://nerderati.com/2011/03/17/simplify-your-life-with-an-ssh-config-file/).
 
-### Config File ###
+### Config File (and Tutorial) ###
 > .sync-config.cson
 
 ```
@@ -44,6 +44,7 @@ behaviour:
                             # instead of syncing single file or folder
 option:
     deleteFiles: true       # Delete files during syncing
+    autoHideDelay: 1500     # Time delay to hide console
     exclude: [              # Excluding patterns
         '.sync-config.cson'
         '.git'
@@ -51,11 +52,13 @@ option:
         'tmp'
         'vendor'
     ]
+    flags: 'avzpur'         # Advanced option: rsync flags
+    shell: 'ssh'
 trigger:                    # Triggers fire after uploading file successfully
                             # which STARTS with following patterns
-    "*": [                  # Wildcard trigger for any file uploaded
-        "uptime"
-    ]
+
+    "*": "uptime"            # Wildcard trigger for any file uploaded
+
     "resources/scripts/coffee": [   # Any file under %PROJECT_ROOT%/resources/scripts/coffee
                                     # being uploaded will fire this trigger
 
