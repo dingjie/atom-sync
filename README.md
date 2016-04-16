@@ -66,7 +66,7 @@ trigger:                    # Triggers fire after uploading file successfully
         "coffee -b --output public/js/ --compile resources/scripts/coffee/"
 
         # Notice: You can also pipe commands but don't forget to escape special characters
-        "ls public/js/|xargs -I@ echo \\t=>@"
+        "ls public/js/|xargs -I@ echo \\t@"
     ]
     "resources/scripts/sass": [
         "echo Compile sass to css ..."
