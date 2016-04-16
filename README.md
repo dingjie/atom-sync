@@ -59,14 +59,13 @@ trigger:                    # Triggers fire after uploading file successfully
 
     "*": "uptime"            # Wildcard trigger for any file uploaded
 
-    "resources/scripts/coffee": [   # Any file under %PROJECT_ROOT%/resources/scripts/coffee
+    "resources/scripts/coffee": [   # Any file under %PROJECT_ROOT%/resources/scripts/coffee \
                                     # being uploaded will fire this trigger
 
         "echo Compile coffeescript to js ..."
-        "coffee -b --output public/js/ --compile resources/scripts/coffee/"
-
-        # Notice: You can also pipe commands but don't forget to escape special characters
-        "ls public/js/|xargs -I@ echo \\t@"
+        "coffee -b --output js/ --compile coffee/"
+        "ls public/js/|xargs -I@ echo \\t@"       # You can also pipe commands but don't \
+                                                  # forget to escape special characters
     ]
     "resources/scripts/sass": [
         "echo Compile sass to css ..."
