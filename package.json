@@ -6,6 +6,7 @@
   "keywords": [
     "sync",
     "ssh",
+    "sftp",
     "rsync",
     "remote"
   ],
