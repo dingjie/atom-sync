@@ -115,7 +115,7 @@ module.exports = ServiceController =
         tasks = _.flattenDeep _.filter config.trigger, (o, i) => (i is '*') or rpath.startsWith i
 
         if tasks?.length > 0
-            tasks.unshift "cd #{config.remote.path}"
+            tasks.unshift "cd \"#{config.remote.path.replace "\"", "\\\""}\""
 
             cmd = _.map tasks, (x) ->
                 x.replace ';', '\\;'
