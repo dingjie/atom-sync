@@ -95,6 +95,20 @@ trigger:
 #### Result ####
 ![trigger](https://cloud.githubusercontent.com/assets/586262/14584004/a2cf2872-0466-11e6-9908-5f035a8b4e46.gif)
 
+#### Suggestion ####
+Trigger is implemented via ssh, it would be great to use triggers with SSH ControlMaster by transferring data through single ssh tunnel instead of making one ssh connection for rsync and another for ssh command, which could be very slow under unideal network speed or connection limits.
+
+###### Config sample of ~/.ssh/config ######
+
+```
+Host *
+    ControlMaster auto
+    ControlPath ~/.ssh/ssh-%r@%h:%p
+    ControlPersist 10m
+    ServerAliveInterval 30
+```
+
+
 ### Keybindings ###
 * `ctrl`+`alt`+`l` (Windows/Linux) `cmd`+`alt`+`l` (Mac) Toggle log window
 
