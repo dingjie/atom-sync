@@ -1,6 +1,6 @@
 # See https://atom.io/docs/latest/hacking-atom-package-word-count#menus for more details
 'context-menu':
-  '.tree-view.full-menu .header.list-item': [
+  '.tree-view .header.list-item': [
     'label': 'Sync'
     'submenu': [
       {
@@ -18,7 +18,7 @@
     ]
   ]
 
-  '.tree-view.full-menu .file.list-item': [
+  '.tree-view .file.list-item': [
     'label': 'Sync'
     'submenu': [
       {
